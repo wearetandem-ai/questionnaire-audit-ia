@@ -2,7 +2,10 @@
   "slug": "demo",
   "entreprise": "Entreprise de démonstration",
   "langue": "fr",
-  "langues_disponibles": ["fr", "en"],
+  "langues_disponibles": [
+    "fr",
+    "en"
+  ],
   "nominatif": false,
   "directions": [
     "Direction générale",
@@ -19,5 +22,9 @@
     "en": "Demo and pilot-test version. Answers sent here do not concern any real client."
   },
   "contact": "gaspard.moulin@wearetandem.ai",
-  "webhook": ""
+  "webhook": "",
+  "outils_fournis": [
+    "copilot_m365"
+  ],
+  "effectif_invite": 40
 }

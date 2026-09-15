@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tableau de bord : questionnaire IA</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,.10);
+  --navy: #1f3a5f; --accent: #e8672b;
+  --lvl1: #86b6ef; --lvl2: #2a78d6; --lvl3: #104281;           /* Débutant, Intermédiaire, Avancé : bleu séquentiel */
+  --bonne: #1baf7a; --nsp: #c3c2b7; --mauvaise: #eb6834;       /* résultats par question */
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --focus: #9ec5fe; --radius: 12px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.45; color: var(--ink); background: var(--page); padding-inline: 16px; padding-block: 0 40px; }
+a { color: var(--navy); }
+.wrap { max-width: 1240px; margin: 0 auto; }
+header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 10px; }
+header h1 { font-size: 22px; margin: 0; color: var(--navy); }
+header .sub { color: var(--ink-2); font-size: 14px; }
+.status { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
+.dot.off { background: var(--axis); } .dot.err { background: var(--critical); }
+.btn { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--grid); background: var(--surface); color: var(--navy); cursor: pointer; text-decoration: none; }
+.btn:hover { border-color: var(--navy); }
+.btn:focus-visible, select:focus-visible, input:focus-visible, .cell:focus-visible, .chip:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; background: var(--surface); border: 1px solid var(--grid); border-radius: var(--radius); padding: 12px 14px; margin: 8px 0 16px; }
+.filters label { font-size: 12px; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; min-width: 150px; flex: 1 1 150px; }
+.filters select { font: inherit; font-size: 14px; padding: 6px 8px; border: 1px solid var(--grid); border-radius: 8px; background: #fff; }
+.filters .reset { align-self: end; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); }
+.card { grid-column: span 12; background: var(--surface); border: 1px solid var(--grid); border-radius: var(--radius); padding: 16px 18px; min-width: 0; }
+.card.half { grid-column: span 6; } .card.third { grid-column: span 4; } .card.two-thirds { grid-column: span 8; }
+@media (max-width: 900px) { .card.half, .card.third, .card.two-thirds { grid-column: span 12; } }
+.card h2 { font-size: 16px; margin: 0 0 4px; color: var(--navy); }
+.card .hint { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--grid); border-radius: var(--radius); padding: 12px 14px; }
+.kpi .v { font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.kpi .l { font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+.kpi .d { font-size: 12px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--ink-2); margin: 6px 0 10px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.rows { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: minmax(140px, 42%) 1fr 48px; gap: 10px; align-items: center; font-size: 13.5px; }
+.row .lab { color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
+.row .lab small { color: var(--muted); }
+.row .n { text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+.bar { display: flex; height: 18px; border-radius: 4px; overflow: hidden; background: #f0efec; gap: 2px; }
+.bar > span { display: block; height: 100%; background: var(--c); position: relative; color: #fff; font-size: 11px; line-height: 18px; text-align: center; overflow: hidden; white-space: nowrap; min-width: 0; }
+.bar > span.light { color: var(--ink); }
+.bar > span:first-child { border-radius: 4px 0 0 4px; } .bar > span:last-child { border-radius: 0 4px 4px 0; }
+.bar.single > span { border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; font-size: 12.5px; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.matrix { border-collapse: separate; border-spacing: 4px; width: 100%; }
+.matrix th { font-size: 12.5px; text-align: center; border: 0; }
+.matrix th.rowh { text-align: left; }
+.matrix td { border: 0; padding: 0; }
+.cell { display: block; width: 100%; border: 1px solid var(--grid); border-radius: 8px; padding: 10px 6px; text-align: center; cursor: pointer; background: #fff; font: inherit; }
+.cell b { font-size: 20px; display: block; } .cell small { color: var(--ink-2); }
+.cell.prio { box-shadow: inset 0 0 0 2px var(--accent); }
+.cell.active { outline: 3px solid var(--navy); }
+.cell.total { cursor: default; background: transparent; border-style: dashed; }
+.tools td:first-child { font-weight: 600; }
+.flag { display: inline-block; font-size: 11.5px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--grid); color: var(--ink-2); }
+.flag.shadow { border-color: var(--critical); color: var(--critical); }
+.flag.fourni { border-color: var(--good); color: #006300; }
+.flag.perso { border-color: var(--serious); color: #9c3b12; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.chip { font: inherit; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--grid); background: #fff; cursor: pointer; color: var(--ink); }
+.chip::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--axis)); margin-right: 6px; }
+.chip.active { border-color: var(--navy); background: #eef3fa; }
+.texts { display: grid; gap: 8px; }
+.txt { border: 1px solid var(--grid); border-radius: 10px; padding: 10px 12px; background: #fff; }
+.txt .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
+.txt .cat::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 5px; }
+.txt .res { font-weight: 600; }
+.txt .raw { color: var(--ink-2); font-size: 13.5px; margin-top: 2px; }
+.stars { color: var(--accent); letter-spacing: 1px; }
+.empty { color: var(--muted); font-style: italic; padding: 8px 0; }
+details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
+.tablewrap { overflow-x: auto; }
+.keybox { max-width: 520px; margin: 40px auto; background: var(--surface); border: 1px solid var(--grid); border-radius: var(--radius); padding: 24px; }
+.keybox input { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--grid); border-radius: 8px; margin: 8px 0 12px; }
+.notice { background: #fff6ec; border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; margin: 0 0 14px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-size: 12.5px; padding: 6px 9px; border-radius: 6px; max-width: 320px; display: none; z-index: 10; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="empty">Chargement…</p></div>
+<div id="tip" role="tooltip"></div>
+<script>
+(function () {
+  'use strict';
+  var DATA_URL = 'https://n8n.wearetandem.ai/webhook/audit-ia/data';
+  var EXPORT_URL = 'https://n8n.wearetandem.ai/webhook/audit-ia/export';
+  var REFRESH_MS = 30000;
+  var params = new URLSearchParams(location.search);
+  var slug = (params.get('c') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  var key = params.get('key') || '';
+  try { if (!key) key = sessionStorage.getItem('audit-ia-key-' + slug) || ''; else sessionStorage.setItem('audit-ia-key-' + slug, key); } catch (e) {}
+  var $app = document.getElementById('app'), $tip = document.getElementById('tip');
+  var Q = null, CFG = null, DATA = null, timer = null, lastOk = null, lastErr = null;
+  var F = { P1: '', P2: '', P3: '', P4: '', niveau: '', usage: '' };
+  var TF = { cat: '', q: '' };
+  var LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'], USAGES = ['Non-utilisateur', 'Occasionnel', 'Régulier'];
+  var LVLC = { 'Débutant': 'var(--lvl1)', 'Intermédiaire': 'var(--lvl2)', 'Avancé': 'var(--lvl3)' };
+  var CATC = { 'rédaction': 'var(--s1)', "recherche d'info": 'var(--s2)', 'extraction de données': 'var(--s3)', 'reporting': 'var(--s4)', 'saisie inter-outils': 'var(--s5)', 'relation client': 'var(--s6)', 'autre': 'var(--s7)' };
+  var LQ = { L1: 'Tâche répétitive', L2: 'Usage actuel', L3: 'Essai abandonné', L4: 'Information cherchée', L5: 'Première demande à un assistant' };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+  function fmtPct(a, b) { return b ? pct(a, b) + ' %' : '–'; }
+  function avg(arr) { var v = arr.filter(function (x) { return typeof x === 'number' && !isNaN(x); }); return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : null; }
+  function median(arr) { var v = arr.filter(function (x) { return typeof x === 'number' && x > 0; }).sort(function (a, b) { return a - b; }); if (!v.length) return null; var m = Math.floor(v.length / 2); return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; }
+  function opts(qid) { var q = Q.questions.filter(function (x) { return x.id === qid; })[0]; return q && q.options ? q.options : []; }
+  function label(qid, oid) { var o = opts(qid).filter(function (x) { return x.id === oid; })[0]; return o ? o.fr : (oid || '–'); }
+  function toolLabel(id) { var t = Q.outils.filter(function (x) { return x.id === id; })[0]; if (t) return t.label; var e = (CFG.outils_supplementaires || []).filter(function (x) { return String(x.id).toLowerCase() === id; })[0]; return e ? e.label : id; }
+  function enonce(qid) { var q = Q.questions.filter(function (x) { return x.id === qid; })[0]; return q ? q.fr.enonce : qid; }
+  function count(rows, fn) { return rows.filter(fn).length; }
+
+  // ---------------------------------------------------------------- éléments graphiques
+  function stacked(segments, total, opt) {
+    // segments : [{label, n, c}] ; barre empilée avec libellés directs sélectifs
+    opt = opt || {};
+    var h = '<div class="bar' + (segments.length === 1 ? ' single' : '') + '" role="img" aria-label="' + esc(segments.map(function (s) { return s.label + ' ' + s.n; }).join(', ')) + '">';
+    segments.forEach(function (s) {
+      if (!s.n) return;
+      var w = total ? s.n / total * 100 : 0;
+      var light = s.c === 'var(--nsp)' || s.c === 'var(--lvl1)' || s.c === '#e1e0d9' || s.c === '#f0a19f';
+      h += '<span style="width:' + w.toFixed(1) + '%;--c:' + s.c + '" class="' + (light ? 'light' : '') + '" data-tip="' + esc(s.label + ' : ' + s.n + (total ? ' (' + pct(s.n, total) + ' %)' : '')) + '">' + (w >= 9 ? pct(s.n, total) + ' %' : '') + '</span>';
+    });
+    return h + '</div>';
+  }
+  function legend(items) { return '<div class="legend">' + items.map(function (i) { return '<span style="--c:' + i.c + '">' + esc(i.label) + '</span>'; }).join('') + '</div>'; }
+  function levelSegs(rows) { return LEVELS.map(function (l) { return { label: l, n: count(rows, function (r) { return r.niveau === l; }), c: LVLC[l] }; }); }
+  function breakdown(rows, keyFn, cats) {
+    // cats : [{id, label}] ; une ligne par catégorie : barre des niveaux, effectif, score moyen
+    var h = '<div class="rows">';
+    cats.forEach(function (c) {
+      var sub = rows.filter(function (r) { return keyFn(r) === c.id; });
+      if (!sub.length) return;
+      var sc = avg(sub.map(function (r) { return r.score; }));
+      h += '<div class="row"><div class="lab" title="' + esc(c.label) + '">' + esc(c.label) + ' <small>· score ' + (sc === null ? '–' : Math.round(sc)) + '</small></div>' + stacked(levelSegs(sub), sub.length) + '<div class="n">' + sub.length + '</div></div>';
+    });
+    return h + '</div>';
+  }
+  function distRows(rows, qid, ids, extractor, base) {
+    // distribution d'une question à choix : une barre simple par option, part de base
+    var h = '<div class="rows">';
+    ids.forEach(function (oid) {
+      var n = count(rows, function (r) { return extractor(r).indexOf(oid) >= 0; });
+      h += '<div class="row"><div class="lab" title="' + esc(label(qid, oid)) + '">' + esc(label(qid, oid)) + '</div>' + stacked([{ label: label(qid, oid), n: n, c: 'var(--lvl2)' }], base) + '<div class="n">' + n + '</div></div>';
+    });
+    return h + '</div>';
+  }
+
+  // ---------------------------------------------------------------- filtres
+  function applyFilters(rows) {
+    return rows.filter(function (r) {
+      return (!F.P1 || r.P1 === F.P1) && (!F.P2 || r.P2 === F.P2) && (!F.P3 || r.P3 === F.P3) && (!F.P4 || r.P4 === F.P4) && (!F.niveau || r.niveau === F.niveau) && (!F.usage || r.niveau_usage === F.usage);
+    });
+  }
+  function filterBar(all) {
+    var dirs = {}; all.forEach(function (r) { if (r.P1) dirs[r.P1] = 1; }); (CFG.directions || []).forEach(function (d) { dirs[d] = 1; });
+    function sel(name, items, current) {
+      return '<label>' + esc(name) + '<select data-f="' + esc(name === 'Direction' ? 'P1' : name === 'Métier' ? 'P2' : name === 'Ancienneté' ? 'P3' : name === 'Temps sur ordinateur' ? 'P4' : name === 'Niveau de compétence' ? 'niveau' : 'usage') + '"><option value="">Tous</option>' + items.map(function (i) { return '<option value="' + esc(i.id) + '"' + (current === i.id ? ' selected' : '') + '>' + esc(i.label) + '</option>'; }).join('') + '</select></label>';
+    }
+    return '<div class="filters">' +
+      sel('Direction', Object.keys(dirs).sort().map(function (d) { return { id: d, label: d }; }), F.P1) +
+      sel('Métier', opts('P2').map(function (o) { return { id: o.id, label: o.fr }; }), F.P2) +
+      sel('Ancienneté', opts('P3').map(function (o) { return { id: o.id, label: o.fr }; }), F.P3) +
+      sel('Temps sur ordinateur', opts('P4').map(function (o) { return { id: o.id, label: o.fr }; }), F.P4) +
+      sel('Niveau de compétence', LEVELS.map(function (l) { return { id: l, label: l }; }), F.niveau) +
+      sel("Niveau d'usage", USAGES.map(function (l) { return { id: l, label: l }; }), F.usage) +
+      '<button type="button" class="btn reset" id="reset-f">Réinitialiser</button></div>';
+  }
+
+  // ---------------------------------------------------------------- sections
+  function kpis(rows, all) {
+    var users = rows.filter(function (r) { return r.U1 !== 'jamais'; });
+    var sc = avg(rows.map(function (r) { return r.score; }));
+    var med = median(rows.map(function (r) { return r.duration_s; }));
+    var inv = CFG.effectif_invite || 0;
+    var items = [
+      { v: rows.length + (rows.length !== all.length ? ' <span class="d">/ ' + all.length + '</span>' : ''), l: 'Répondants' + (inv ? ' · taux ' + fmtPct(all.length, inv) : ''), d: inv ? all.length + ' réponses sur ' + inv + ' invités' : 'Renseigner effectif_invite dans la configuration pour le taux de réponse' },
+      { v: sc === null ? '–' : Math.round(sc), l: 'Score compétence moyen /100', d: 'Blocs 2 et 3, seuils ' + DATA.params.seuil_inter + ' / ' + DATA.params.seuil_avance },
+      { v: fmtPct(count(rows, function (r) { return r.niveau_usage === 'Régulier'; }), rows.length), l: 'Utilisateurs réguliers', d: count(rows, function (r) { return r.U1 === 'jamais'; }) + ' non-utilisateurs' },
+      { v: fmtPct(count(rows, function (r) { return r.outil_non_fourni; }), users.length), l: 'Utilisent un outil non fourni', d: 'compte personnel gratuit ou payé, sur ' + users.length + ' utilisateurs' },
+      { v: fmtPct(count(rows, function (r) { return r.donnees_sensibles; }), users.length), l: 'Ont saisi des données clients, RH ou financières', d: 'sur ' + users.length + ' utilisateurs' },
+      { v: fmtPct(count(rows, function (r) { return r.regle_connue; }), rows.length), l: 'Connaissent la règle interne', d: count(rows, function (r) { return r.U5 === 'non' || r.U5 === 'nsp'; }) + ' pensent qu’il n’y en a pas ou ne savent pas' },
+      { v: med === null ? '–' : Math.round(med / 60) + ' min', l: 'Durée médiane de complétion', d: 'cible 12 à 15 min' }
+    ];
+    return '<div class="kpis">' + items.map(function (i) { return '<div class="kpi"><div class="v">' + i.v + '</div><div class="l">' + esc(i.l) + '</div><div class="d">' + esc(i.d) + '</div></div>'; }).join('') + '</div>';
+  }
+  function matrix(rows) {
+    var h = '<div class="card half"><h2>Matrice usage × compétence</h2><p class="hint">Cliquez sur une case pour filtrer tout le tableau de bord. Contour orange : cases prioritaires pour le client (usage régulier avec compétence débutante ; compétence avancée avec usage faible).</p>';
+    h += '<table class="matrix"><thead><tr><th class="rowh">Usage \\ Compétence</th>' + LEVELS.map(function (l) { return '<th>' + l + '</th>'; }).join('') + '<th>Total</th></tr></thead><tbody>';
+    var max = 1; USAGES.forEach(function (u) { LEVELS.forEach(function (l) { max = Math.max(max, count(rows, function (r) { return r.niveau_usage === u && r.niveau === l; })); }); });
+    USAGES.forEach(function (u) {
+      h += '<tr><th class="rowh">' + u + '</th>';
+      LEVELS.forEach(function (l) {
+        var n = count(rows, function (r) { return r.niveau_usage === u && r.niveau === l; });
+        var prio = (u === 'Régulier' && l === 'Débutant') || (u !== 'Régulier' && l === 'Avancé');
+        var active = F.usage === u && F.niveau === l;
+        var alpha = n ? 0.12 + 0.55 * (n / max) : 0;
+        h += '<td><button type="button" class="cell' + (prio ? ' prio' : '') + (active ? ' active' : '') + '" data-u="' + u + '" data-l="' + l + '" style="background:rgba(42,120,214,' + alpha.toFixed(2) + ')"><b>' + n + '</b><small>' + fmtPct(n, rows.length) + '</small></button></td>';
+      });
+      h += '<td><span class="cell total"><b>' + count(rows, function (r) { return r.niveau_usage === u; }) + '</b><small>' + fmtPct(count(rows, function (r) { return r.niveau_usage === u; }), rows.length) + '</small></span></td></tr>';
+    });
+    h += '<tr><th class="rowh">Total</th>' + LEVELS.map(function (l) { var n = count(rows, function (r) { return r.niveau === l; }); return '<td><span class="cell total"><b>' + n + '</b><small>' + fmtPct(n, rows.length) + '</small></span></td>'; }).join('') + '<td><span class="cell total"><b>' + rows.length + '</b><small>100 %</small></span></td></tr>';
+    return h + '</tbody></table></div>';
+  }
+  function levelsCard(rows) {
+    var lg = legend(LEVELS.map(function (l) { return { label: l, c: LVLC[l] }; }));
+    var h = '<div class="card half"><h2>Cartographie des niveaux</h2><p class="hint">Part de chaque niveau de compétence, puis lecture par métier, ancienneté et temps passé devant un ordinateur. Le score moyen est indiqué à côté de chaque libellé.</p>' + lg;
+    h += '<div class="rows"><div class="row"><div class="lab">Ensemble</div>' + stacked(levelSegs(rows), rows.length) + '<div class="n">' + rows.length + '</div></div></div>';
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Par métier</h3>' + breakdown(rows, function (r) { return r.P2; }, opts('P2').map(function (o) { return { id: o.id, label: o.fr.split(' (')[0] }; }));
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Par ancienneté</h3>' + breakdown(rows, function (r) { return r.P3; }, opts('P3').map(function (o) { return { id: o.id, label: o.fr }; }));
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Par temps passé devant un ordinateur</h3>' + breakdown(rows, function (r) { return r.P4; }, opts('P4').map(function (o) { return { id: o.id, label: o.fr }; }));
+    return h + '</div>';
+  }
+  function directionsCard(rows) {
+    var dirs = {}; rows.forEach(function (r) { dirs[r.P1 || '(non renseigné)'] = 1; });
+    var cats = Object.keys(dirs).sort().map(function (d) { return { id: d === '(non renseigné)' ? '' : d, label: d }; });
+    return '<div class="card half"><h2>Par direction</h2><p class="hint">Niveaux de compétence et score moyen par direction déclarée (question P1).</p>' + legend(LEVELS.map(function (l) { return { label: l, c: LVLC[l] }; })) + breakdown(rows, function (r) { return r.P1 || ''; }, cats) + '</div>';
+  }
+  function usageCard(rows) {
+    var users = rows.filter(function (r) { return r.U1 !== 'jamais'; });
+    var h = '<div class="card half"><h2>Usage actuel</h2><p class="hint">Fréquence déclarée, tâches confiées à l’IA et temps estimé gagné, sur l’ensemble des répondants filtrés.</p>';
+    h += '<h3 style="font-size:14px;margin:8px 0 6px">Fréquence (U1)</h3>' + distRows(rows, 'U1', opts('U1').map(function (o) { return o.id; }), function (r) { return [r.U1]; }, rows.length);
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Tâches déjà confiées à l’IA (U8, utilisateurs)</h3>' + distRows(users, 'U8', opts('U8').map(function (o) { return o.id; }), function (r) { return r.U8; }, users.length);
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Temps estimé gagné par semaine (U9, utilisateurs)</h3>' + distRows(users, 'U9', opts('U9').map(function (o) { return o.id; }), function (r) { return [r.U9]; }, users.length);
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Formation reçue (U10)</h3>' + distRows(rows, 'U10', opts('U10').map(function (o) { return o.id; }), function (r) { return r.U10; }, rows.length);
+    return h + '</div>';
+  }
+  function questionsCard(rows) {
+    var lg = legend([{ label: 'Bonne réponse', c: 'var(--bonne)' }, { label: 'Je ne sais pas', c: 'var(--nsp)' }, { label: 'Mauvaise réponse (croyance fausse)', c: 'var(--mauvaise)' }]);
+    var h = '<div class="card half"><h2>Résultats par question</h2><p class="hint">La part de mauvaises réponses signale des croyances fausses à traiter en formation, à distinguer du « je ne sais pas ». C8 mesure la veille et n’entre pas dans le score.</p>' + lg + '<div class="rows">';
+    ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10'].forEach(function (qid) {
+      var answered = rows.filter(function (r) { return r.res[qid] && r.res[qid] !== 'vide'; });
+      var segs = [
+        { label: 'Bonne réponse', n: count(answered, function (r) { return r.res[qid] === 'bonne'; }), c: 'var(--bonne)' },
+        { label: 'Je ne sais pas', n: count(answered, function (r) { return r.res[qid] === 'nsp'; }), c: 'var(--nsp)' },
+        { label: 'Mauvaise réponse', n: count(answered, function (r) { return r.res[qid] === 'mauvaise'; }), c: 'var(--mauvaise)' }
+      ];
+      h += '<div class="row"><div class="lab" data-tip="' + esc(enonce(qid)) + '"><b>' + qid + '</b>' + (qid === 'C8' ? ' <small>hors score</small>' : '') + ' <small>' + esc(enonce(qid).slice(0, 60)) + '…</small></div>' + stacked(segs, answered.length) + '<div class="n">' + answered.length + '</div></div>';
+    });
+    return h + '</div></div>';
+  }
+  function shadowCard(rows) {
+    var users = rows.filter(function (r) { return r.U1 !== 'jamais'; });
+    var fournis = CFG.outils_fournis || [];
+    var h = '<div class="card two-thirds"><h2>Shadow AI</h2><p class="hint">Outils déclarés et type de compte, rapprochés de la liste des outils fournis par la DSI (configuration du client : outils_fournis).</p>';
+    h += '<div class="tablewrap"><table class="tools"><thead><tr><th>Outil</th><th class="num">Déclaré</th><th class="num">Perso gratuit</th><th class="num">Perso payé</th><th class="num">Entreprise</th><th class="num">Ne sait pas</th><th>Statut</th></tr></thead><tbody>';
+    var toolIds = {}; users.forEach(function (r) { r.tools.forEach(function (t) { toolIds[t.id] = 1; }); });
+    Q.outils.forEach(function (t) { if (t.id !== 'aucun') toolIds[t.id] = toolIds[t.id] || 0; });
+    Object.keys(toolIds).forEach(function (id) {
+      var decl = users.filter(function (r) { return r.tools.some(function (t) { return t.id === id; }); });
+      if (!decl.length && fournis.indexOf(id) < 0) return;
+      function acc(k) { return count(decl, function (r) { return r.tools.some(function (t) { return t.id === id && t.compte === k; }); }); }
+      var perso = acc('perso_gratuit') + acc('perso_paye');
+      var statut = fournis.indexOf(id) >= 0 ? (perso ? '<span class="flag perso">Fourni, mais ' + perso + ' compte(s) perso</span>' : '<span class="flag fourni">Fourni par la DSI</span>') : (decl.length ? '<span class="flag shadow">Non fourni : ' + decl.length + ' utilisateur(s)</span>' : '');
+      h += '<tr><td>' + esc(toolLabel(id)) + '</td><td class="num">' + decl.length + '</td><td class="num">' + acc('perso_gratuit') + '</td><td class="num">' + acc('perso_paye') + '</td><td class="num">' + acc('entreprise') + '</td><td class="num">' + acc('nsp') + '</td><td>' + statut + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+    var prec = []; users.forEach(function (r) { if (r.U2_metier_precision) prec.push('outil métier : ' + r.U2_metier_precision); if (r.U2_autre_precision) prec.push('autre : ' + r.U2_autre_precision); });
+    if (prec.length) h += '<p class="hint" style="margin-top:8px">Précisions saisies : ' + esc(prec.join(' · ')) + '</p>';
+    h += '<div class="grid" style="margin-top:14px"><div style="grid-column:span 6;min-width:0"><h3 style="font-size:14px;margin:0 0 6px">Données saisies dans un outil IA (U4, utilisateurs)</h3>' + distRows(users, 'U4', opts('U4').map(function (o) { return o.id; }), function (r) { return r.U4; }, users.length) + '</div>';
+    h += '<div style="grid-column:span 6;min-width:0"><h3 style="font-size:14px;margin:0 0 6px">Raison d’un outil non fourni (U7)</h3>' + distRows(users.filter(function (r) { return r.U7 && r.U7 !== 'sans_objet'; }), 'U7', opts('U7').map(function (o) { return o.id; }).filter(function (i) { return i !== 'sans_objet'; }), function (r) { return [r.U7]; }, users.filter(function (r) { return r.U7 && r.U7 !== 'sans_objet'; }).length) + '</div></div>';
+    return h + '</div>';
+  }
+  function governanceCard(rows) {
+    var users = rows.filter(function (r) { return r.U1 !== 'jamais'; });
+    var h = '<div class="card third"><h2>Règle interne et visibilité</h2><p class="hint">Connaissance de la règle écrite (tous les répondants) et information du manager (utilisateurs).</p>';
+    h += '<h3 style="font-size:14px;margin:8px 0 6px">Règle écrite sur l’usage de l’IA (U5)</h3>' + distRows(rows, 'U5', opts('U5').map(function (o) { return o.id; }), function (r) { return [r.U5]; }, rows.length);
+    h += '<h3 style="font-size:14px;margin:14px 0 6px">Le manager sait-il ? (U6)</h3>' + distRows(users, 'U6', opts('U6').map(function (o) { return o.id; }).filter(function (i) { return i !== 'sans_objet'; }), function (r) { return [r.U6]; }, users.length);
+    return h + '</div>';
+  }
+  function postureCard(rows) {
+    var cols = ['#e34948', '#f0a19f', '#e1e0d9', '#86b6ef', '#2a78d6'];
+    var lg = legend([{ label: '1 Pas du tout d’accord', c: cols[0] }, { label: '2', c: cols[1] }, { label: '3', c: cols[2] }, { label: '4', c: cols[3] }, { label: '5 Tout à fait d’accord', c: cols[4] }]);
+    var h = '<div class="card half"><h2>Posture et appétence</h2><p class="hint">Quatre affirmations sur une échelle de 1 à 5. Sert à segmenter la conduite du changement, pas à scorer.</p>' + lg + '<div class="rows">';
+    ['A1', 'A2', 'A3', 'A4'].forEach(function (a, i) {
+      var vals = rows.map(function (r) { return r.A[i]; }).filter(function (v) { return v !== null && !isNaN(v); });
+      var segs = [1, 2, 3, 4, 5].map(function (k) { return { label: 'Note ' + k, n: vals.filter(function (v) { return v === k; }).length, c: cols[k - 1] }; });
+      var m = avg(vals);
+      h += '<div class="row" style="grid-template-columns:1fr"><div class="lab" style="white-space:normal">' + esc(enonce(a)) + ' <small>· moyenne ' + (m === null ? '–' : m.toFixed(1)) + ' · d’accord ' + fmtPct(vals.filter(function (v) { return v >= 4; }).length, vals.length) + '</small></div></div><div class="row" style="grid-template-columns:1fr 56px">' + stacked(segs, vals.length) + '<div class="n">' + vals.length + '</div></div>';
+    });
+    return h + '</div></div>';
+  }
+  function textsCard(rows) {
+    var items = [];
+    rows.forEach(function (r) { Object.keys(r.textes).forEach(function (l) { var t = r.textes[l]; items.push({ id: r.id, l: l, P1: r.P1, P2: r.P2, cat: t.cat, resume: t.resume, texte: t.texte, interet: t.interet, signal: t.signal, source: t.source }); }); });
+    var cats = DATA.categories;
+    var h = '<div class="card"><h2>Backlog brut de cas d’usage (textes libres)</h2><p class="hint">Chaque réponse libre est classée en sept catégories avec un résumé et un indice d’intérêt de 1 à 3. Classification par Claude quand elle est disponible, sinon par mots-clés (indiqué sur chaque carte). Cliquez sur une catégorie ou une question pour filtrer.</p>';
+    var llm = items.filter(function (i) { return i.source === 'llm'; }).length;
+    if (items.length && llm < items.length) h += '<div class="notice">' + (items.length - llm) + ' texte(s) sur ' + items.length + ' classé(s) par mots-clés en attendant le passage du LLM (toutes les 10 minutes une fois la clé API Anthropic renseignée dans n8n).</div>';
+    h += '<div class="chips">' + cats.map(function (c) { var n = items.filter(function (i) { return i.cat === c; }).length; return '<button type="button" class="chip' + (TF.cat === c ? ' active' : '') + '" data-cat="' + esc(c) + '" style="--c:' + CATC[c] + '">' + esc(c) + ' · ' + n + '</button>'; }).join('') + '</div>';
+    h += '<div class="chips">' + Object.keys(LQ).map(function (l) { var n = items.filter(function (i) { return i.l === l; }).length; return '<button type="button" class="chip' + (TF.q === l ? ' active' : '') + '" data-q="' + l + '" style="--c:var(--axis)">' + l + ' ' + esc(LQ[l]) + ' · ' + n + '</button>'; }).join('') + '</div>';
+    var shown = items.filter(function (i) { return (!TF.cat || i.cat === TF.cat) && (!TF.q || i.l === TF.q); }).sort(function (a, b) { return b.interet - a.interet; });
+    h += '<div class="texts">';
+    if (!shown.length) h += '<p class="empty">Aucun texte pour ce filtre.</p>';
+    shown.slice(0, 200).forEach(function (i) {
+      h += '<div class="txt"><div class="meta"><span class="cat" style="--c:' + CATC[i.cat] + '">' + esc(i.cat) + '</span><span class="stars" data-tip="Intérêt ' + i.interet + ' / 3">' + '●'.repeat(i.interet) + '○'.repeat(3 - i.interet) + '</span><span>' + i.l + ' · ' + esc(LQ[i.l]) + '</span><span>' + esc(label('P2', i.P2)).split(' (')[0] + (i.P1 ? ' · ' + esc(i.P1) : '') + '</span>' + (i.signal ? '<span class="flag">' + esc(i.signal) + '</span>' : '') + '<span class="flag">' + (i.source === 'llm' ? 'classé par Claude' : 'mots-clés') + '</span></div>';
+      h += (i.source === 'llm' ? '<div class="res">' + esc(i.resume) + '</div><div class="raw">' + esc(i.texte) + '</div>' : '<div class="res">' + esc(i.texte) + '</div>');
+      h += '</div>';
+    });
+    if (shown.length > 200) h += '<p class="empty">' + (shown.length - 200) + ' textes supplémentaires non affichés : affinez le filtre.</p>';
+    h += '</div>';
+    var s2b = rows.filter(function (r) { return r.S2b; });
+    if (s2b.length) h += '<details style="margin-top:12px"><summary>Justifications du scénario S2 (' + s2b.length + ', pour les entretiens)</summary><ul>' + s2b.map(function (r) { return '<li><small>' + esc(label('P2', r.P2)).split(' (')[0] + ' · ' + esc(r.niveau) + '</small> : ' + esc(r.S2b) + '</li>'; }).join('') + '</ul></details>';
+    return h + '</div>';
+  }
+  function tableCard(rows) {
+    var h = '<div class="card"><details><summary>Vue tableau (' + rows.length + ' répondants filtrés)</summary><div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Date</th><th>Direction</th><th>Métier</th><th>Ancienneté</th><th>Ordinateur</th><th class="num">Bloc 2</th><th class="num">Bloc 3</th><th class="num">Score</th><th>Compétence</th><th>Fréquence</th><th class="num">Outils</th><th>Usage</th><th>Non fourni</th><th>Données sensibles</th><th>Règle connue</th><th class="num">Durée</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      h += '<tr><td>' + esc((r.submitted_at || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(r.P1) + '</td><td>' + esc(label('P2', r.P2)).split(' (')[0] + '</td><td>' + esc(label('P3', r.P3)) + '</td><td>' + esc(label('P4', r.P4)) + '</td><td class="num">' + r.b2 + '</td><td class="num">' + r.b3 + '</td><td class="num">' + r.score + '</td><td>' + r.niveau + '</td><td>' + esc(label('U1', r.U1)) + '</td><td class="num">' + r.nb_outils + '</td><td>' + r.niveau_usage + '</td><td>' + (r.outil_non_fourni ? 'oui' : '') + '</td><td>' + (r.donnees_sensibles ? 'oui' : '') + '</td><td>' + (r.regle_connue ? 'oui' : '') + '</td><td class="num">' + (r.duration_s ? Math.round(r.duration_s / 60) + ' min' : '') + '</td></tr>';
+    });
+    return h + '</tbody></table></div></details></div>';
+  }
+
+  // ---------------------------------------------------------------- rendu global
+  function render() {
+    var all = DATA.rows, rows = applyFilters(all);
+    var since = lastOk ? Math.round((Date.now() - lastOk) / 1000) : null;
+    var h = '<header class="top"><div><h1>Tableau de bord : questionnaire IA</h1><div class="sub">' + esc(CFG.entreprise || slug) + ' · code ' + esc(slug) + '</div></div>';
+    h += '<div class="status"><span class="dot' + (lastErr ? ' err' : (timer ? '' : ' off')) + '"></span><span id="since">' + (lastErr ? 'Erreur de rafraîchissement : ' + esc(lastErr) : 'Mis à jour il y a ' + (since === null ? '–' : since + ' s') + ', actualisation toutes les 30 s') + '</span>';
+    h += '<button type="button" class="btn" id="refresh">Actualiser</button><a class="btn" href="' + EXPORT_URL + '?c=' + encodeURIComponent(slug) + '&key=' + encodeURIComponent(key) + '">Télécharger le CSV</a><a class="btn" href="./?c=' + encodeURIComponent(slug) + '" target="_blank" rel="noopener">Ouvrir le questionnaire</a></div></header>';
+    h += filterBar(all);
+    if (!all.length) { h += '<div class="card"><p class="empty">Aucune réponse reçue pour le moment pour ce client. Le tableau se remplira automatiquement dès la première soumission.</p></div>'; $app.innerHTML = h; bind(); return; }
+    h += kpis(rows, all);
+    h += '<div class="grid" style="margin-top:16px">' + matrix(rows) + levelsCard(rows) + directionsCard(rows) + questionsCard(rows) + shadowCard(rows) + governanceCard(rows) + usageCard(rows) + postureCard(rows) + textsCard(rows) + tableCard(rows) + '</div>';
+    h += '<p class="hint" style="margin-top:16px">Données calculées côté serveur (n8n) à partir des réponses brutes ; corrigé et barème ne sont jamais transmis à cette page. Dernier calcul : ' + esc((DATA.generated_at || '').replace('T', ' ').slice(0, 19)) + ' UTC.</p>';
+    $app.innerHTML = h;
+    bind();
+  }
+  function bind() {
+    $app.querySelectorAll('select[data-f]').forEach(function (s) { s.addEventListener('change', function () { F[s.getAttribute('data-f')] = s.value; render(); }); });
+    var rf = document.getElementById('reset-f'); if (rf) rf.addEventListener('click', function () { F = { P1: '', P2: '', P3: '', P4: '', niveau: '', usage: '' }; TF = { cat: '', q: '' }; render(); });
+    var rb = document.getElementById('refresh'); if (rb) rb.addEventListener('click', function () { load(true); });
+    $app.querySelectorAll('.cell[data-u]').forEach(function (c) { c.addEventListener('click', function () { var u = c.getAttribute('data-u'), l = c.getAttribute('data-l'); if (F.usage === u && F.niveau === l) { F.usage = ''; F.niveau = ''; } else { F.usage = u; F.niveau = l; } render(); }); });
+    $app.querySelectorAll('.chip[data-cat]').forEach(function (c) { c.addEventListener('click', function () { TF.cat = TF.cat === c.getAttribute('data-cat') ? '' : c.getAttribute('data-cat'); render(); }); });
+    $app.querySelectorAll('.chip[data-q]').forEach(function (c) { c.addEventListener('click', function () { TF.q = TF.q === c.getAttribute('data-q') ? '' : c.getAttribute('data-q'); render(); }); });
+  }
+  document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('[data-tip]'); if (!t) { $tip.style.display = 'none'; return; } $tip.textContent = t.getAttribute('data-tip'); $tip.style.display = 'block'; });
+  document.addEventListener('mousemove', function (e) { if ($tip.style.display === 'block') { $tip.style.left = Math.min(window.innerWidth - 330, e.clientX + 12) + 'px'; $tip.style.top = (e.clientY + 14) + 'px'; } });
+
+  // ---------------------------------------------------------------- chargement
+  function askKey(msg) {
+    $app.innerHTML = '<div class="keybox"><h1 style="font-size:20px;color:var(--navy);margin:0 0 8px">Tableau de bord : questionnaire IA</h1><p>' + esc(msg || 'Saisissez le code client et la clé d’accès Tandem.') + '</p><label>Code client<input id="k-slug" value="' + esc(slug) + '" placeholder="ex. demo"></label><label>Clé d’accès<input id="k-key" type="password" value=""></label><button type="button" class="btn" id="k-go">Ouvrir</button></div>';
+    document.getElementById('k-go').addEventListener('click', function () {
+      var s = document.getElementById('k-slug').value.toLowerCase().replace(/[^a-z0-9_-]/g, ''), k = document.getElementById('k-key').value.trim();
+      if (!s || !k) return;
+      location.search = '?c=' + encodeURIComponent(s) + '&key=' + encodeURIComponent(k);
+    });
+  }
+  function load(manual) {
+    if (!slug || !key) return askKey();
+    var p = [];
+    if (!Q) p.push(fetch('data/questions.json?v=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) { Q = j; }));
+    if (!CFG) p.push(fetch('clients/' + slug + '.json?v=' + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { CFG = j || {}; }).catch(function () { CFG = {}; }));
+    p.push(fetch(DATA_URL + '?c=' + encodeURIComponent(slug) + '&key=' + encodeURIComponent(key) + '&_=' + Date.now()).then(function (r) { if (r.status === 403) throw new Error('403'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) { DATA = j; }));
+    Promise.all(p).then(function () { lastOk = Date.now(); lastErr = null; render(); schedule(); })
+      .catch(function (e) {
+        if (String(e.message) === '403') { try { sessionStorage.removeItem('audit-ia-key-' + slug); } catch (x) {} return askKey('Clé refusée ou code client inconnu. Vérifiez les deux valeurs.'); }
+        lastErr = e.message || 'réseau';
+        if (DATA) render(); else $app.innerHTML = '<div class="keybox"><p>Impossible de charger les données (' + esc(lastErr) + '). Nouvelle tentative dans 30 secondes.</p></div>';
+        schedule();
+      });
+  }
+  function schedule() { if (timer) clearTimeout(timer); timer = setTimeout(function () { if (document.hidden) { schedule(); return; } load(false); }, REFRESH_MS); }
+  setInterval(function () { var s = document.getElementById('since'); if (s && lastOk && !lastErr) s.textContent = 'Mis à jour il y a ' + Math.round((Date.now() - lastOk) / 1000) + ' s, actualisation toutes les 30 s'; }, 5000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && lastOk && Date.now() - lastOk > REFRESH_MS) load(false); });
+  load(true);
+})();
+</script>
+</body>
+</html>

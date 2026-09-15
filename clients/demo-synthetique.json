@@ -1,0 +1,24 @@
+{
+  "slug": "demo-synthetique",
+  "entreprise": "Entreprise de démonstration (30 répondants synthétiques)",
+  "langue": "fr",
+  "langues_disponibles": ["fr", "en"],
+  "nominatif": false,
+  "directions": [
+    "Direction commerciale",
+    "Finance",
+    "Ressources humaines",
+    "Opérations",
+    "DSI",
+    "Marketing"
+  ],
+  "outils_supplementaires": [],
+  "intro_complement": {
+    "fr": "Jeu de données de démonstration du tableau de bord. Ne pas diffuser.",
+    "en": "Dashboard demo dataset. Do not share."
+  },
+  "contact": "gaspard.moulin@wearetandem.ai",
+  "webhook": "",
+  "outils_fournis": ["copilot_m365", "claude"],
+  "effectif_invite": 45
+}

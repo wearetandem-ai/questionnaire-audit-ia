@@ -2,7 +2,10 @@
   "slug": "demo-nominatif",
   "entreprise": "Entreprise de démonstration (version nominative)",
   "langue": "fr",
-  "langues_disponibles": ["fr", "en"],
+  "langues_disponibles": [
+    "fr",
+    "en"
+  ],
   "nominatif": true,
   "directions": [
     "Direction générale",
@@ -18,5 +21,9 @@
     "en": "Demo version with name and e-mail fields enabled."
   },
   "contact": "gaspard.moulin@wearetandem.ai",
-  "webhook": ""
+  "webhook": "",
+  "outils_fournis": [
+    "copilot_m365"
+  ],
+  "effectif_invite": 40
 }

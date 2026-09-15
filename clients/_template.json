@@ -3,7 +3,10 @@
   "slug": "nom-client",
   "entreprise": "Nom de l'entreprise tel qu'affiché aux collaborateurs",
   "langue": "fr",
-  "langues_disponibles": ["fr", "en"],
+  "langues_disponibles": [
+    "fr",
+    "en"
+  ],
   "nominatif": false,
   "_nominatif": "true = ajoute deux champs facultatifs nom et e-mail en tête du questionnaire (parcours individuels). À valider avec le client (RH ou DSI), voir brief §8.1.",
   "directions": [
@@ -26,5 +29,11 @@
   "_intro_complement": "Phrase optionnelle affichée sur l'écran d'accueil, par exemple le nom du sponsor interne et la date limite de réponse.",
   "contact": "",
   "_contact": "Adresse e-mail affichée sur l'écran de fin pour les questions des collaborateurs (souvent le chef de projet côté client).",
-  "webhook": ""
+  "webhook": "",
+  "outils_fournis": [
+    "copilot_m365"
+  ],
+  "_outils_fournis": "Identifiants des outils officiellement fournis par la DSI (liste : chatgpt, claude, gemini, mistral, copilot_m365, copilot_code, perplexity, notion_ai, metier, autre, plus vos outils_supplementaires). Sert au tableau de bord pour signaler le shadow AI : tout outil déclaré hors de cette liste est marqué « non fourni ».",
+  "effectif_invite": 0,
+  "_effectif_invite": "Nombre de collaborateurs invités, pour afficher le taux de réponse dans le tableau de bord. 0 = non renseigné."
 }
