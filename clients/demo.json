@@ -1,0 +1,23 @@
+{
+  "slug": "demo",
+  "entreprise": "Entreprise de démonstration",
+  "langue": "fr",
+  "langues_disponibles": ["fr", "en"],
+  "nominatif": false,
+  "directions": [
+    "Direction générale",
+    "Commercial et relation client",
+    "Opérations / production",
+    "Finance et contrôle de gestion",
+    "Ressources humaines",
+    "Marketing et communication",
+    "Systèmes d'information"
+  ],
+  "outils_supplementaires": [],
+  "intro_complement": {
+    "fr": "Version de démonstration et de test pilote. Les réponses envoyées ici ne concernent aucun client réel.",
+    "en": "Demo and pilot-test version. Answers sent here do not concern any real client."
+  },
+  "contact": "gaspard.moulin@wearetandem.ai",
+  "webhook": ""
+}

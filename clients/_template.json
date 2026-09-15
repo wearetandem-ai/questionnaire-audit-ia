@@ -1,0 +1,30 @@
+{
+  "_commentaire": "Copiez ce fichier en clients/<slug>.json (slug = lettres minuscules, chiffres, - ou _). L'URL du questionnaire sera https://wearetandem-ai.github.io/questionnaire-audit-ia/?c=<slug>. Supprimez les clés commençant par _ si vous le souhaitez, elles sont ignorées.",
+  "slug": "nom-client",
+  "entreprise": "Nom de l'entreprise tel qu'affiché aux collaborateurs",
+  "langue": "fr",
+  "langues_disponibles": ["fr", "en"],
+  "nominatif": false,
+  "_nominatif": "true = ajoute deux champs facultatifs nom et e-mail en tête du questionnaire (parcours individuels). À valider avec le client (RH ou DSI), voir brief §8.1.",
+  "directions": [
+    "Direction générale",
+    "Commercial et relation client",
+    "Opérations / production",
+    "Finance et contrôle de gestion",
+    "Ressources humaines",
+    "Marketing et communication",
+    "Systèmes d'information",
+    "Juridique et conformité"
+  ],
+  "_directions": "Liste proposée à la question P1. Reprenez l'organigramme du client ; 6 à 12 entrées, sinon la lecture par direction devient illisible. Une entrée « Autre / je préfère ne pas répondre » est ajoutée automatiquement.",
+  "outils_supplementaires": [],
+  "_outils_supplementaires": "Outils propres au client à ajouter à la liste U2, par exemple [{\"id\": \"assistant_maison\", \"label\": \"Assistant interne XYZ\", \"label_en\": \"Internal assistant XYZ\"}]. L'id doit être court, sans espace ; la colonne U3_<id> n'existe pas dans la Data Table : le type de compte de ces outils remonte dans la colonne raw du CSV uniquement si vous ajoutez la colonne côté n8n.",
+  "intro_complement": {
+    "fr": "",
+    "en": ""
+  },
+  "_intro_complement": "Phrase optionnelle affichée sur l'écran d'accueil, par exemple le nom du sponsor interne et la date limite de réponse.",
+  "contact": "",
+  "_contact": "Adresse e-mail affichée sur l'écran de fin pour les questions des collaborateurs (souvent le chef de projet côté client).",
+  "webhook": ""
+}

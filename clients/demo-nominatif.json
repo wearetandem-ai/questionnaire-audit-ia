@@ -1,0 +1,22 @@
+{
+  "slug": "demo-nominatif",
+  "entreprise": "Entreprise de démonstration (version nominative)",
+  "langue": "fr",
+  "langues_disponibles": ["fr", "en"],
+  "nominatif": true,
+  "directions": [
+    "Direction générale",
+    "Commercial et relation client",
+    "Opérations / production",
+    "Finance et contrôle de gestion",
+    "Ressources humaines",
+    "Systèmes d'information"
+  ],
+  "outils_supplementaires": [],
+  "intro_complement": {
+    "fr": "Version de démonstration avec champs nom et e-mail activés.",
+    "en": "Demo version with name and e-mail fields enabled."
+  },
+  "contact": "gaspard.moulin@wearetandem.ai",
+  "webhook": ""
+}

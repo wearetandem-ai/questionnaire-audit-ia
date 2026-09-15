@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Questionnaire : usages et compétences IA</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" id="brand">Questionnaire IA<small id="brand-sub"></small></div>
+    <button type="button" class="lang-toggle" id="lang-toggle" hidden></button>
+  </header>
+
+  <div class="progress" id="progress" hidden>
+    <div class="progress-bar"><span id="progress-fill"></span></div>
+    <div class="progress-label"><span id="progress-step"></span><span id="progress-block"></span></div>
+  </div>
+
+  <main>
+    <div class="card" id="app" aria-live="polite">
+      <p class="meta" id="loading">Chargement…</p>
+    </div>
+  </main>
+
+  <p class="footer">Questionnaire réalisé avec <span id="footer-brand">Tandem</span>. Aucune donnée n'est utilisée à des fins d'évaluation individuelle.</p>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
