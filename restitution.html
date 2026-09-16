@@ -8,9 +8,9 @@
 <style>
 :root {
   color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
-  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,.10);
-  --navy: #1f3a5f; --accent: #e8672b;
+  --page: #f5f1e9; --surface: #ffffff; --ink: #333333; --ink-2: #5b5852; --muted: #888888;
+  --grid: #e8e4dc; --axis: #c3c2b7; --ring: rgba(11,11,11,.10);
+  --navy: #333333; --accent: #e3654a;
   --lvl1: #86b6ef; --lvl2: #2a78d6; --lvl3: #104281;
   --bonne: #1baf7a; --nsp: #c3c2b7; --mauvaise: #eb6834;
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
@@ -24,8 +24,8 @@ a { color: var(--navy); }
 .wrap { max-width: 1000px; margin: 0 auto; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 4px; }
 .toolbar .who { color: var(--ink-2); font-size: 13px; }
-.btn { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--navy); background: var(--navy); color: #fff; cursor: pointer; text-decoration: none; }
-.btn.ghost { background: var(--surface); color: var(--navy); }
+.btn { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; text-decoration: none; }
+.btn.ghost { background: var(--surface); color: var(--navy); border-color: var(--grid); }
 .btn:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .cover { background: var(--navy); color: #fff; border-radius: var(--radius); padding: 30px 32px; margin: 8px 0 18px; }
 .cover .kick { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
@@ -139,7 +139,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
     segments.forEach(function (s) {
       if (!s.n) return;
       var w = total ? s.n / total * 100 : 0;
-      var light = s.c === 'var(--nsp)' || s.c === 'var(--lvl1)' || s.c === '#e1e0d9' || s.c === '#f0a19f';
+      var light = s.c === 'var(--nsp)' || s.c === 'var(--lvl1)' || s.c === '#e8e4dc' || s.c === '#f0a19f';
       h += '<span style="width:' + w.toFixed(1) + '%;--c:' + s.c + '" class="' + (light ? 'light' : '') + '">' + (w >= 9 ? pct(s.n, total) + ' %' : '') + '</span>';
     });
     return h + '</div>';
@@ -160,7 +160,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
     var h = '<div class="rows">';
     ids.forEach(function (oid) {
       var n = count(rows, function (r) { return extractor(r).indexOf(oid) >= 0; });
-      h += '<div class="row"><div class="lab" title="' + esc(label(qid, oid)) + '">' + esc(label(qid, oid)) + '</div>' + stacked([{ label: label(qid, oid), n: n, c: 'var(--lvl2)' }], base) + '<div class="n">' + n + '</div></div>';
+      h += '<div class="row"><div class="lab" title="' + esc(label(qid, oid)) + '">' + esc(label(qid, oid)) + '</div>' + stacked([{ label: label(qid, oid), n: n, c: 'var(--accent)' }], base) + '<div class="n">' + n + '</div></div>';
     });
     return h + '</div>';
   }
@@ -235,7 +235,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
         var n = count(rows, function (r) { return r.niveau_usage === u && r.niveau === l; });
         var prio = (u === 'Régulier' && l === 'Débutant') || (u !== 'Régulier' && l === 'Avancé');
         var alpha = n ? 0.12 + 0.55 * (n / max) : 0;
-        h += '<td><span class="cell' + (prio ? ' prio' : '') + '" style="background:rgba(42,120,214,' + alpha.toFixed(2) + ')"><b>' + n + '</b><small>' + fmtPct(n, rows.length) + '</small></span></td>';
+        h += '<td><span class="cell' + (prio ? ' prio' : '') + '" style="background:rgba(227,101,74,' + alpha.toFixed(2) + ')"><b>' + n + '</b><small>' + fmtPct(n, rows.length) + '</small></span></td>';
       });
       h += '<td><span class="cell total"><b>' + count(rows, function (r) { return r.niveau_usage === u; }) + '</b><small>' + fmtPct(count(rows, function (r) { return r.niveau_usage === u; }), rows.length) + '</small></span></td></tr>';
     });
@@ -306,7 +306,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
     return h + '</div>';
   }
   function postureCard(rows) {
-    var cols = ['#e34948', '#f0a19f', '#e1e0d9', '#86b6ef', '#2a78d6'];
+    var cols = ['#e34948', '#f0a19f', '#e8e4dc', '#86b6ef', '#2a78d6'];
     var lg = legend([{ label: '1 Pas du tout d\'accord', c: cols[0] }, { label: '2', c: cols[1] }, { label: '3', c: cols[2] }, { label: '4', c: cols[3] }, { label: '5 Tout à fait d\'accord', c: cols[4] }]);
     var h = '<div class="card"><h2>Posture et appétence</h2><p class="hint">Quatre affirmations sur une échelle de 1 à 5. Sert à segmenter la conduite du changement, pas à scorer.</p>' + lg + '<div class="rows">';
     ['A1', 'A2', 'A3', 'A4'].forEach(function (a, i) {

@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Console Audit IA — Tandem</title>
 <style>
-  :root { --navy:#1F3A5F; --ink:#1a2233; --muted:#5b6472; --line:#e2e6ee; --bg:#f4f6fa; --card:#fff; --ok:#1f7a4d; --warn:#9a6a00; --err:#9c0006; --accent:#2f6df6; }
+  :root { --navy:#333333; --ink:#333333; --muted:#888888; --line:#e8e4dc; --bg:#f5f1e9; --card:#fff; --ok:#1f7a4d; --warn:#9a6a00; --err:#9c0006; --accent:#e3654a; }
   * { box-sizing:border-box; }
   body { margin:0; font:14px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
   header.top { background:var(--navy); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
@@ -19,13 +19,13 @@
   table { width:100%; border-collapse:collapse; }
   th,td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
   th { font-size:12px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); }
-  .btn { display:inline-block; border:1px solid var(--navy); background:var(--navy); color:#fff; border-radius:7px; padding:8px 12px; font-size:13px; cursor:pointer; text-decoration:none; }
+  .btn { display:inline-block; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:7px; padding:8px 12px; font-size:13px; cursor:pointer; text-decoration:none; }
   .btn.ghost { background:#fff; color:var(--navy); }
   .btn.sm { padding:5px 9px; font-size:12px; }
   .btn:disabled { opacity:.5; cursor:default; }
   .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:12px; font-weight:600; }
   .b-en_ligne { background:#e3f3ea; color:var(--ok); }
-  .b-brouillon { background:#eef1f6; color:var(--muted); }
+  .b-brouillon { background:#f0eee8; color:var(--muted); }
   .b-cloturee { background:#fdecea; color:var(--err); }
   .b-archivee { background:#f0efe6; color:var(--warn); }
   label { display:block; font-size:12px; color:var(--muted); margin:10px 0 3px; }
@@ -38,7 +38,7 @@
   .tools input { width:auto; }
   .muted { color:var(--muted); font-size:12px; }
   .links a { display:block; word-break:break-all; margin:2px 0; color:var(--accent); font-size:12.5px; }
-  .keyval { font-family:ui-monospace,Menlo,Consolas,monospace; background:#f0f2f7; padding:2px 6px; border-radius:5px; font-size:12.5px; }
+  .keyval { font-family:ui-monospace,Menlo,Consolas,monospace; background:#f3efe7; padding:2px 6px; border-radius:5px; font-size:12.5px; }
   .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; }
   .toast.show { opacity:1; }
   .login { max-width:380px; margin:10vh auto; }
@@ -46,7 +46,7 @@
   .flex { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
   hr { border:none; border-top:1px solid var(--line); margin:16px 0; }
   .mt0 { margin-top:0; }
-  .baro { display:inline-block; width:70px; height:7px; border-radius:4px; background:#e7eaf1; overflow:hidden; vertical-align:middle; margin-right:6px; }
+  .baro { display:inline-block; width:70px; height:7px; border-radius:4px; background:#ece7de; overflow:hidden; vertical-align:middle; margin-right:6px; }
   .barf { height:100%; border-radius:4px; }
   .kpis { display:flex; gap:22px; flex-wrap:wrap; }
   .kpi .n { font-size:22px; font-weight:700; color:var(--navy); }
@@ -457,11 +457,20 @@
     h += '<div class="row"><div><label>Rôle</label><select id="u_role"><option value="consultant"' + (u.role !== 'admin' ? ' selected' : '') + '>Consultant (clients + campagnes)</option><option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Admin (+ gestion des utilisateurs)</option></select></div>' +
       '<div><label>Statut</label><select id="u_active"><option value="1"' + (u.active !== false ? ' selected' : '') + '>Actif</option><option value="0"' + (u.active === false ? ' selected' : '') + '>Désactivé (clé invalide)</option></select></div></div>';
     if (!u._new && u.user_key) h += '<p class="muted" style="margin-top:12px">Clé d\'accès : <span class="keyval">' + esc(u.user_key) + '</span> <button class="btn ghost sm" onclick="window.__copy(\'' + esc(u.user_key) + '\')">Copier</button> <button class="btn ghost sm" id="u_regen">Régénérer</button></p>';
-    h += '<div style="margin-top:18px"><button class="btn" id="u_save">Enregistrer</button> <button class="btn ghost" id="u_cancel">Annuler</button></div>';
+    var canDelete = !u._new && u.user_id && u.user_id !== 'usr-admin-seed';
+    h += '<div class="flex" style="margin-top:18px"><div><button class="btn" id="u_save">Enregistrer</button> <button class="btn ghost" id="u_cancel">Annuler</button></div>' +
+      (canDelete ? '<button class="btn ghost sm" id="u_delete" style="color:var(--err);border-color:var(--err)">Supprimer définitivement</button>' : '') + '</div>';
     h += '<div id="u_result"></div></div></main>';
     $app.innerHTML = h;
     document.getElementById('back').onclick = openUsers;
     document.getElementById('u_cancel').onclick = openUsers;
+    var db = document.getElementById('u_delete');
+    if (db) db.onclick = function () {
+      if (!confirm('Supprimer définitivement « ' + (u.name || u.user_id) + ' » ? Sa clé sera invalidée immédiatement. Cette action est irréversible.')) return;
+      this.disabled = true; var self = this;
+      api('delete-user', { user_id: u.user_id }).then(function () { toast('Utilisateur supprimé'); openUsers(); })
+        .catch(function (e) { self.disabled = false; toast(String(e.message) === '403' ? 'Réservé aux administrateurs' : 'Erreur : ' + e.message); });
+    };
     var regen = false;
     var rb = document.getElementById('u_regen'); if (rb) rb.onclick = function () { regen = true; toast('Nouvelle clé à l\'enregistrement'); };
     document.getElementById('u_save').onclick = function () {
