@@ -6,31 +6,33 @@ URL de production : `https://wearetandem-ai.github.io/questionnaire-audit-ia/?c=
 
 Tableau de bord temps réel (interne, protégé par clé) : `https://wearetandem-ai.github.io/questionnaire-audit-ia/dashboard.html?c=<slug-client>&key=<clé>`. La page ne contient aucun corrigé : elle affiche des résultats déjà interprétés par n8n et se rafraîchit toutes les 30 secondes.
 
+Console admin (interne, Tandem) : `https://wearetandem-ai.github.io/questionnaire-audit-ia/admin.html`. Créer et configurer les clients, ouvrir/fermer les campagnes, lire les compteurs et récupérer les liens/clés — sans passer par git. Protégée par la clé admin (demandée à Gaspard/Josselin).
+
 Paramètres d'URL :
 
 | Paramètre | Rôle |
 |---|---|
-| `c` | slug du client, doit correspondre à un fichier `clients/<slug>.json` (obligatoire, sinon écran « lien invalide ») |
+| `c` | slug du client (obligatoire). La config vient de l'endpoint n8n `/audit-ia/config` (repli sur `clients/<slug>.json` si n8n est indisponible). |
+| `m` | id de la mission/campagne (optionnel). Absent = campagne « en ligne » active du client. |
 | `lang` | `fr` ou `en`, sinon la langue par défaut du client |
 | `reset` | efface le brouillon et l'état « déjà répondu » de l'appareil (usage interne pour les tests) |
 
 ## Déployer pour un nouveau client
 
-1. Copier `clients/_template.json` en `clients/<slug>.json` et renseigner : nom de l'entreprise, liste des directions (P1), `nominatif` (faux par défaut), langue par défaut, contact, phrase d'accueil.
-2. Commit et push sur `main`. GitHub Pages publie en une à deux minutes.
-3. Ouvrir `…/?c=<slug>` et dérouler le questionnaire une fois en entier (envoyer une réponse de test : elle porte le slug du client et se filtre ensuite).
-4. Envoyer le lien aux collaborateurs (mail type dans le guide de déploiement interne).
-5. Suivre et restituer dans le tableau de bord (`dashboard.html?c=<slug>&key=…`) ; l'export CSV reste disponible pour un livrable Excel figé.
+**Via la console admin (recommandé, sans git)** : ouvrir `admin.html`, « + Nouveau client », renseigner les champs, enregistrer. Le client est immédiatement servi par `/audit-ia/config`. L'onglet « Liens » donne le lien questionnaire, le dashboard (avec clé), l'export, le QR code et un modèle de mail. Ouvrir/fermer la campagne depuis « Campagnes ».
+
+Les fichiers `clients/*.json` ne servent plus que de repli hors-ligne : la source de vérité est la table Clients dans n8n.
 
 ## Structure
 
 ```
 index.html            page unique du questionnaire
 dashboard.html        tableau de bord temps réel (lecture de l'endpoint n8n /audit-ia/data)
+admin.html            console admin Tandem (appelle l'API n8n /audit-ia/admin/api/*)
 assets/app.js         rendu des questions, logique conditionnelle, brouillon local, envoi
 assets/style.css      styles, responsive, accessibilité
 data/questions.json   questions FR/EN (généré depuis la banque interne, sans corrigé : ne pas éditer à la main)
-clients/*.json        configuration par client
+clients/*.json        repli hors-ligne de la config par client (source de vérité : table n8n)
 ```
 
 ## Logique conditionnelle

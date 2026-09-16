@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Console Audit IA — Tandem</title>
+<style>
+  :root { --navy:#1F3A5F; --ink:#1a2233; --muted:#5b6472; --line:#e2e6ee; --bg:#f4f6fa; --card:#fff; --ok:#1f7a4d; --warn:#9a6a00; --err:#9c0006; --accent:#2f6df6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); }
+  header.top { background:var(--navy); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  header.top h1 { font-size:17px; margin:0; }
+  header.top .who { font-size:12px; opacity:.85; }
+  main { max-width:1180px; margin:0 auto; padding:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px; }
+  h2 { font-size:16px; color:var(--navy); margin:0 0 12px; }
+  h3 { font-size:14px; color:var(--navy); margin:16px 0 8px; }
+  table { width:100%; border-collapse:collapse; }
+  th,td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); }
+  .btn { display:inline-block; border:1px solid var(--navy); background:var(--navy); color:#fff; border-radius:7px; padding:8px 12px; font-size:13px; cursor:pointer; text-decoration:none; }
+  .btn.ghost { background:#fff; color:var(--navy); }
+  .btn.sm { padding:5px 9px; font-size:12px; }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:12px; font-weight:600; }
+  .b-en_ligne { background:#e3f3ea; color:var(--ok); }
+  .b-brouillon { background:#eef1f6; color:var(--muted); }
+  .b-cloturee { background:#fdecea; color:var(--err); }
+  .b-archivee { background:#f0efe6; color:var(--warn); }
+  label { display:block; font-size:12px; color:var(--muted); margin:10px 0 3px; }
+  input[type=text],input[type=email],input[type=number],textarea,select { width:100%; border:1px solid var(--line); border-radius:7px; padding:8px 9px; font:inherit; color:var(--ink); background:#fff; }
+  textarea { min-height:72px; resize:vertical; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:180px; }
+  .tools { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:4px; }
+  .tools label { display:flex; align-items:center; gap:5px; margin:0; font-size:13px; color:var(--ink); }
+  .tools input { width:auto; }
+  .muted { color:var(--muted); font-size:12px; }
+  .links a { display:block; word-break:break-all; margin:2px 0; color:var(--accent); font-size:12.5px; }
+  .keyval { font-family:ui-monospace,Menlo,Consolas,monospace; background:#f0f2f7; padding:2px 6px; border-radius:5px; font-size:12.5px; }
+  .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; }
+  .toast.show { opacity:1; }
+  .login { max-width:380px; margin:10vh auto; }
+  .empty { color:var(--muted); padding:16px 0; }
+  .flex { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  hr { border:none; border-top:1px solid var(--line); margin:16px 0; }
+  .mt0 { margin-top:0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+(function () {
+  'use strict';
+  var API = 'https://n8n.wearetandem.ai/webhook/audit-ia/admin/api';
+  var PAGES = 'https://wearetandem-ai.github.io/questionnaire-audit-ia/';
+  var TOOLS = [
+    { id: 'chatgpt', label: 'ChatGPT' }, { id: 'claude', label: 'Claude' }, { id: 'gemini', label: 'Gemini' },
+    { id: 'mistral', label: 'Mistral / Le Chat' }, { id: 'dust', label: 'Dust' }, { id: 'copilot_m365', label: 'Copilot (M365)' },
+    { id: 'copilot_code', label: 'GitHub Copilot' }, { id: 'perplexity', label: 'Perplexity' }, { id: 'notion_ai', label: 'Notion AI' },
+    { id: 'metier', label: 'IA outil métier' }
+  ];
+  var $app = document.getElementById('app'), $toast = document.getElementById('toast');
+  var key = '';
+  try { key = sessionStorage.getItem('audit-ia-admin') || ''; } catch (e) {}
+  var state = { clients: [], editing: null, missionsFor: null };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(m) { $toast.textContent = m; $toast.classList.add('show'); setTimeout(function () { $toast.classList.remove('show'); }, 2200); }
+  function copy(t) { try { navigator.clipboard.writeText(t); toast('Copié'); } catch (e) { toast('Copie impossible'); } }
+  window.__copy = copy;
+
+  function api(action, payload) {
+    return fetch(API + '/' + action, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ key: key }, payload || {}))
+    }).then(function (r) {
+      if (r.status === 403) throw new Error('403');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  // ---------------------------------------------------------------- login
+  function renderLogin(msg) {
+    $app.innerHTML =
+      '<div class="login card"><h2 class="mt0">Console Audit IA — Tandem</h2>' +
+      (msg ? '<p class="muted" style="color:var(--err)">' + esc(msg) + '</p>' : '<p class="muted">Saisissez la clé admin.</p>') +
+      '<label>Clé admin</label><input id="k" type="text" autocomplete="off">' +
+      '<div style="margin-top:14px"><button class="btn" id="go">Ouvrir la console</button></div></div>';
+    document.getElementById('k').focus();
+    document.getElementById('go').onclick = function () {
+      key = document.getElementById('k').value.trim();
+      if (!key) return;
+      try { sessionStorage.setItem('audit-ia-admin', key); } catch (e) {}
+      load();
+    };
+    document.getElementById('k').addEventListener('keydown', function (e) { if (e.key === 'Enter') document.getElementById('go').click(); });
+  }
+
+  function load() {
+    $app.innerHTML = '<main><div class="card"><p class="empty">Chargement…</p></div></main>';
+    api('list').then(function (res) {
+      state.clients = (res && res.clients) || [];
+      renderMain();
+    }).catch(function (e) {
+      if (String(e.message) === '403') { try { sessionStorage.removeItem('audit-ia-admin'); } catch (x) {} key = ''; return renderLogin('Clé admin refusée.'); }
+      $app.innerHTML = '<main><div class="card"><p class="empty">Erreur de chargement (' + esc(e.message) + '). <button class="btn sm" onclick="location.reload()">Réessayer</button></p></div></main>';
+    });
+  }
+
+  // ---------------------------------------------------------------- main list
+  function statutBadge(s) { return '<span class="badge b-' + esc(s || 'brouillon') + '">' + esc(s || 'brouillon') + '</span>'; }
+
+  function activeMission(c) {
+    var ms = c.missions || [];
+    var en = ms.filter(function (m) { return m.statut === 'en_ligne'; }).sort(function (a, b) { return String(b.date_ouverture).localeCompare(String(a.date_ouverture)); });
+    return en[0] || ms.slice().sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); })[0] || null;
+  }
+
+  function renderMain() {
+    var h = '<header class="top"><h1>Console Audit IA — Tandem</h1><div class="flex" style="gap:12px"><span class="who">' + state.clients.length + ' client(s)</span>' +
+      '<button class="btn ghost sm" id="logout">Se déconnecter</button></div></header><main>';
+    h += '<div class="card"><div class="flex"><h2 class="mt0">Clients</h2><button class="btn" id="new">+ Nouveau client</button></div>';
+    if (!state.clients.length) {
+      h += '<p class="empty">Aucun client. Créez le premier avec « Nouveau client ».</p>';
+    } else {
+      h += '<table><thead><tr><th>Entreprise</th><th>Code</th><th>Campagne active</th><th>Réponses</th><th>Actions</th></tr></thead><tbody>';
+      state.clients.forEach(function (c, i) {
+        var m = activeMission(c);
+        var count = m ? (m.count || 0) : (c.missions || []).reduce(function (n, x) { return n + (x.count || 0); }, 0);
+        h += '<tr>' +
+          '<td><strong>' + esc(c.entreprise || '') + '</strong>' + (c.archived ? ' <span class="badge b-archivee">archivé</span>' : '') + '</td>' +
+          '<td><span class="keyval">' + esc(c.slug) + '</span></td>' +
+          '<td>' + (m ? esc(m.libelle || 'Campagne') + ' ' + statutBadge(m.statut) : '<span class="muted">aucune</span>') + '</td>' +
+          '<td><strong>' + count + '</strong>' + (m && m.effectif_invite ? ' <span class="muted">/ ' + m.effectif_invite + '</span>' : '') + '</td>' +
+          '<td><button class="btn ghost sm" data-edit="' + i + '">Éditer</button> ' +
+          '<button class="btn ghost sm" data-miss="' + i + '">Campagnes</button> ' +
+          '<button class="btn ghost sm" data-links="' + i + '">Liens</button></td></tr>';
+      });
+      h += '</tbody></table>';
+    }
+    h += '</div></main>';
+    $app.innerHTML = h;
+    document.getElementById('logout').onclick = function () { try { sessionStorage.removeItem('audit-ia-admin'); } catch (e) {} key = ''; renderLogin(); };
+    document.getElementById('new').onclick = function () { state.editing = { _new: true, langues_disponibles: ['fr', 'en'], langue: 'fr', nominatif: false, directions: [], outils_supplementaires: [], outils_fournis: [], intro_complement: { fr: '', en: '' } }; renderClientForm(); };
+    $app.querySelectorAll('[data-edit]').forEach(function (b) { b.onclick = function () { state.editing = JSON.parse(JSON.stringify(state.clients[+b.getAttribute('data-edit')])); renderClientForm(); }; });
+    $app.querySelectorAll('[data-miss]').forEach(function (b) { b.onclick = function () { state.missionsFor = state.clients[+b.getAttribute('data-miss')].slug; renderMissions(); }; });
+    $app.querySelectorAll('[data-links]').forEach(function (b) { b.onclick = function () { renderLinks(state.clients[+b.getAttribute('data-links')]); }; });
+  }
+
+  // ---------------------------------------------------------------- client form
+  function renderClientForm() {
+    var c = state.editing;
+    var toolsBoxes = TOOLS.map(function (t) {
+      var on = (c.outils_fournis || []).indexOf(t.id) >= 0;
+      return '<label><input type="checkbox" data-tool="' + t.id + '"' + (on ? ' checked' : '') + '> ' + esc(t.label) + '</label>';
+    }).join('');
+    var h = '<header class="top"><h1>' + (c._new ? 'Nouveau client' : 'Éditer ' + esc(c.entreprise || c.slug)) + '</h1><button class="btn ghost sm" id="back">← Retour</button></header><main><div class="card">';
+    h += '<div class="row"><div><label>Nom de l\'entreprise</label><input type="text" id="entreprise" value="' + esc(c.entreprise || '') + '"></div>' +
+      '<div><label>Code (slug) ' + (c._new ? '<span class="muted">— laissez vide pour auto</span>' : '<span class="muted">— non modifiable</span>') + '</label><input type="text" id="slug" value="' + esc(c.slug || '') + '"' + (c._new ? '' : ' readonly') + '></div></div>';
+    h += '<div class="row"><div><label>Langue par défaut</label><select id="langue"><option value="fr"' + (c.langue === 'fr' ? ' selected' : '') + '>Français</option><option value="en"' + (c.langue === 'en' ? ' selected' : '') + '>Anglais</option></select></div>' +
+      '<div><label>Langues disponibles</label><select id="langs"><option value="fr,en"' + ((c.langues_disponibles || []).join(',') === 'fr,en' ? ' selected' : '') + '>FR + EN</option><option value="fr"' + ((c.langues_disponibles || []).join(',') === 'fr' ? ' selected' : '') + '>FR seulement</option><option value="en"' + ((c.langues_disponibles || []).join(',') === 'en' ? ' selected' : '') + '>EN seulement</option></select></div>' +
+      '<div><label>Nominatif</label><select id="nominatif"><option value="0"' + (!c.nominatif ? ' selected' : '') + '>Non (pseudonymisé)</option><option value="1"' + (c.nominatif ? ' selected' : '') + '>Oui (nom + e-mail)</option></select></div></div>';
+    h += '<label>Directions / services <span class="muted">— une par ligne, 6 à 12</span></label><textarea id="directions">' + esc((c.directions || []).join('\n')) + '</textarea>';
+    h += '<label>Outils fournis par la DSI <span class="muted">— pour le repérage du shadow AI</span></label><div class="tools">' + toolsBoxes + '</div>';
+    h += '<div class="row"><div><label>Contact (e-mail affiché en fin de questionnaire)</label><input type="email" id="contact" value="' + esc(c.contact || '') + '"></div>' +
+      '<div><label>Secteur <span class="muted">(optionnel)</span></label><input type="text" id="secteur" value="' + esc(c.secteur || '') + '"></div>' +
+      '<div><label>Tranche d\'effectif <span class="muted">(optionnel)</span></label><input type="text" id="tranche" value="' + esc(c.tranche_effectif || '') + '"></div></div>';
+    h += '<label>Message d\'accueil FR <span class="muted">(optionnel)</span></label><textarea id="intro_fr">' + esc((c.intro_complement || {}).fr || '') + '</textarea>';
+    h += '<label>Message d\'accueil EN <span class="muted">(optionnel)</span></label><textarea id="intro_en">' + esc((c.intro_complement || {}).en || '') + '</textarea>';
+    if (c._new) {
+      h += '<hr><h3 class="mt0">Première campagne</h3><div class="row"><div><label>Libellé</label><input type="text" id="m_lib" value="Audit initial"></div>' +
+        '<div><label>Effectif invité</label><input type="number" id="m_eff" value="0" min="0"></div>' +
+        '<div><label>Statut</label><select id="m_stat"><option value="brouillon">Brouillon</option><option value="en_ligne" selected>En ligne</option></select></div></div>';
+    } else {
+      h += '<hr><div class="flex"><label style="margin:0">Archiver ce client</label><select id="archived" style="width:auto"><option value="0"' + (!c.archived ? ' selected' : '') + '>Actif</option><option value="1"' + (c.archived ? ' selected' : '') + '>Archivé</option></select></div>';
+      if (c.client_key) h += '<p class="muted" style="margin-top:12px">Clé dashboard : <span class="keyval">' + esc(c.client_key) + '</span> <button class="btn ghost sm" onclick="window.__copy(\'' + esc(c.client_key) + '\')">Copier</button> <button class="btn ghost sm" id="regen">Régénérer</button></p>';
+    }
+    h += '<div style="margin-top:18px"><button class="btn" id="save">Enregistrer</button> <button class="btn ghost" id="cancel">Annuler</button></div>';
+    h += '</div></main>';
+    $app.innerHTML = h;
+    document.getElementById('back').onclick = renderMain;
+    document.getElementById('cancel').onclick = renderMain;
+    var regen = false;
+    var rb = document.getElementById('regen'); if (rb) rb.onclick = function () { regen = true; toast('Nouvelle clé à l\'enregistrement'); };
+    document.getElementById('save').onclick = function () {
+      var dirs = document.getElementById('directions').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+      var fournis = []; $app.querySelectorAll('[data-tool]').forEach(function (cb) { if (cb.checked) fournis.push(cb.getAttribute('data-tool')); });
+      var client = {
+        slug: document.getElementById('slug').value.trim(),
+        entreprise: document.getElementById('entreprise').value.trim(),
+        langue: document.getElementById('langue').value,
+        langues_disponibles: document.getElementById('langs').value.split(','),
+        nominatif: document.getElementById('nominatif').value === '1',
+        directions: dirs,
+        outils_supplementaires: c.outils_supplementaires || [],
+        outils_fournis: fournis,
+        intro_complement: { fr: document.getElementById('intro_fr').value.trim(), en: document.getElementById('intro_en').value.trim() },
+        contact: document.getElementById('contact').value.trim(),
+        secteur: document.getElementById('secteur').value.trim(),
+        tranche_effectif: document.getElementById('tranche').value.trim(),
+        archived: document.getElementById('archived') ? document.getElementById('archived').value === '1' : false,
+        client_key: c.client_key || '',
+        created_at: c.created_at || '',
+        _regen: regen
+      };
+      if (!client.entreprise) { toast('Le nom de l\'entreprise est requis'); return; }
+      this.disabled = true; var self = this;
+      api('save-client', { client: client }).then(function (res) {
+        var slug = res.client.slug;
+        if (c._new) {
+          return api('save-mission', { mission: { client_slug: slug, libelle: document.getElementById('m_lib').value.trim() || 'Audit initial', effectif_invite: +document.getElementById('m_eff').value || 0, statut: document.getElementById('m_stat').value } });
+        }
+      }).then(function () { toast('Enregistré'); load(); }).catch(function (e) { self.disabled = false; toast('Erreur : ' + e.message); });
+    };
+  }
+
+  // ---------------------------------------------------------------- missions
+  function renderMissions() {
+    var c = state.clients.filter(function (x) { return x.slug === state.missionsFor; })[0];
+    if (!c) return renderMain();
+    var ms = (c.missions || []).slice().sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
+    var h = '<header class="top"><h1>Campagnes — ' + esc(c.entreprise || c.slug) + '</h1><button class="btn ghost sm" id="back">← Retour</button></header><main><div class="card">';
+    h += '<div class="flex"><h2 class="mt0">Campagnes</h2></div>';
+    if (!ms.length) h += '<p class="empty">Aucune campagne.</p>';
+    else {
+      h += '<table><thead><tr><th>Libellé</th><th>Statut</th><th>Réponses</th><th>Effectif</th><th>Actions</th></tr></thead><tbody>';
+      ms.forEach(function (m) {
+        h += '<tr><td>' + esc(m.libelle || '') + '<br><span class="muted keyval">' + esc(m.mission_id) + '</span></td>' +
+          '<td><select data-stat="' + esc(m.mission_id) + '">' +
+          ['brouillon', 'en_ligne', 'cloturee', 'archivee'].map(function (s) { return '<option value="' + s + '"' + (m.statut === s ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></td>' +
+          '<td><strong>' + (m.count || 0) + '</strong></td>' +
+          '<td><input type="number" data-eff="' + esc(m.mission_id) + '" value="' + (m.effectif_invite || 0) + '" style="width:80px"></td>' +
+          '<td><button class="btn ghost sm" data-savem="' + esc(m.mission_id) + '">Enregistrer</button></td></tr>';
+      });
+      h += '</tbody></table>';
+    }
+    h += '<hr><h3 class="mt0">Nouvelle campagne</h3><div class="row"><div><label>Libellé</label><input type="text" id="nm_lib" placeholder="Ré-audit 6 mois"></div>' +
+      '<div><label>Effectif invité</label><input type="number" id="nm_eff" value="0" min="0"></div>' +
+      '<div><label>Statut</label><select id="nm_stat"><option value="brouillon">Brouillon</option><option value="en_ligne">En ligne</option></select></div>' +
+      '<div style="display:flex;align-items:flex-end"><button class="btn" id="nm_add">Créer</button></div></div>';
+    h += '</div></main>';
+    $app.innerHTML = h;
+    document.getElementById('back').onclick = renderMain;
+    $app.querySelectorAll('[data-savem]').forEach(function (b) {
+      b.onclick = function () {
+        var mid = b.getAttribute('data-savem');
+        var statut = $app.querySelector('[data-stat="' + mid + '"]').value;
+        var eff = +$app.querySelector('[data-eff="' + mid + '"]').value || 0;
+        var m0 = ms.filter(function (x) { return x.mission_id === mid; })[0];
+        b.disabled = true;
+        api('save-mission', { mission: { mission_id: mid, client_slug: c.slug, libelle: m0.libelle, effectif_invite: eff, statut: statut, date_ouverture: m0.date_ouverture || '', date_cloture: (statut === 'cloturee' && !m0.date_cloture) ? new Date().toISOString() : (m0.date_cloture || ''), created_at: m0.created_at || '' } })
+          .then(function () { toast('Campagne mise à jour'); load(); }).catch(function (e) { b.disabled = false; toast('Erreur : ' + e.message); });
+      };
+    });
+    document.getElementById('nm_add').onclick = function () {
+      var lib = document.getElementById('nm_lib').value.trim(); if (!lib) { toast('Libellé requis'); return; }
+      this.disabled = true; var self = this;
+      api('save-mission', { mission: { client_slug: c.slug, libelle: lib, effectif_invite: +document.getElementById('nm_eff').value || 0, statut: document.getElementById('nm_stat').value } })
+        .then(function () { toast('Campagne créée'); load(); }).catch(function (e) { self.disabled = false; toast('Erreur : ' + e.message); });
+    };
+  }
+
+  // ---------------------------------------------------------------- links
+  function renderLinks(c) {
+    var m = activeMission(c);
+    var mid = m ? m.mission_id : '';
+    var formU = PAGES + '?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '');
+    var dashU = PAGES + 'dashboard.html?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
+    var expU = 'https://n8n.wearetandem.ai/webhook/audit-ia/export?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
+    var mail = 'Objet : 15 minutes pour préparer notre plan IA\n\nBonjour à toutes et à tous,\n\nNous démarrons un état des lieux de nos usages de l\'intelligence artificielle, accompagnés par le cabinet Tandem. Première étape : un questionnaire de 12 à 15 minutes, ouvert à tout le monde, à remplir d\'ici le [DATE].\n\nIl n\'y a ni bonne ni mauvaise réponse et ce n\'est pas une évaluation. Les réponses sont ' + (c.nominatif ? 'nominatives (réservées aux RH)' : 'anonymes') + '.\n\nLien : ' + formU + '\n\nMerci de votre participation.';
+    var h = '<header class="top"><h1>Liens — ' + esc(c.entreprise || c.slug) + '</h1><button class="btn ghost sm" id="back">← Retour</button></header><main><div class="card">';
+    h += '<h2 class="mt0">Campagne : ' + (m ? esc(m.libelle) + ' ' + statutBadge(m.statut) : '<span class="muted">aucune</span>') + '</h2>';
+    function line(lab, u) { return '<h3>' + lab + '</h3><div class="links"><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u) + '</a></div><button class="btn ghost sm" onclick="window.__copy(\'' + esc(u).replace(/'/g, "\\'") + '\')">Copier</button>'; }
+    h += line('Questionnaire (à diffuser aux collaborateurs)', formU);
+    h += line('Tableau de bord (sponsor — contient la clé)', dashU);
+    h += line('Export CSV', expU);
+    h += '<h3>Clé dashboard</h3><p><span class="keyval">' + esc(c.client_key || '—') + '</span> <button class="btn ghost sm" onclick="window.__copy(\'' + esc(c.client_key || '') + '\')">Copier</button></p>';
+    h += '<h3>QR code du questionnaire</h3><div id="qr" style="padding:8px 0"></div>';
+    h += '<h3>Modèle de mail d\'envoi</h3><textarea id="mail" style="min-height:220px">' + esc(mail) + '</textarea><div style="margin-top:6px"><button class="btn ghost sm" onclick="window.__copy(document.getElementById(\'mail\').value)">Copier le mail</button></div>';
+    h += '</div></main>';
+    $app.innerHTML = h;
+    document.getElementById('back').onclick = renderMain;
+    var qr = document.createElement('script');
+    qr.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    qr.onload = function () { try { new QRCode(document.getElementById('qr'), { text: formU, width: 150, height: 150 }); } catch (e) {} };
+    qr.onerror = function () { document.getElementById('qr').innerHTML = '<span class="muted">QR indisponible (réseau).</span>'; };
+    document.body.appendChild(qr);
+  }
+
+  // ---------------------------------------------------------------- boot
+  if (key) load(); else renderLogin();
+})();
+</script>
+</body>
+</html>
