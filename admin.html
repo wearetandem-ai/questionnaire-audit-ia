@@ -305,6 +305,7 @@
     var mid = m ? m.mission_id : '';
     var formU = PAGES + '?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '');
     var dashU = PAGES + 'dashboard.html?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
+    var restU = PAGES + 'restitution.html?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
     var expU = 'https://n8n.wearetandem.ai/webhook/audit-ia/export?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
     var mail = 'Objet : 15 minutes pour préparer notre plan IA\n\nBonjour à toutes et à tous,\n\nNous démarrons un état des lieux de nos usages de l\'intelligence artificielle, accompagnés par le cabinet Tandem. Première étape : un questionnaire de 12 à 15 minutes, ouvert à tout le monde, à remplir d\'ici le [DATE].\n\nIl n\'y a ni bonne ni mauvaise réponse et ce n\'est pas une évaluation. Les réponses sont ' + (c.nominatif ? 'nominatives (réservées aux RH)' : 'anonymes') + '.\n\nLien : ' + formU + '\n\nMerci de votre participation.';
     var mCount = m ? (m.count || 0) : 0, mEff = m ? (m.effectif_invite || 0) : 0, mTaux = taux(mCount, mEff);
@@ -314,6 +315,7 @@
     function line(lab, u) { return '<h3>' + lab + '</h3><div class="links"><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u) + '</a></div><button class="btn ghost sm" onclick="window.__copy(\'' + esc(u).replace(/'/g, "\\'") + '\')">Copier</button>'; }
     h += line('Questionnaire (à diffuser aux collaborateurs)', formU);
     h += line('Tableau de bord (sponsor — contient la clé)', dashU);
+    h += line('Restitution imprimable / PDF (client)', restU);
     h += line('Export CSV', expU);
     h += '<h3>Clé dashboard</h3><p><span class="keyval">' + esc(c.client_key || '—') + '</span> <button class="btn ghost sm" onclick="window.__copy(\'' + esc(c.client_key || '') + '\')">Copier</button></p>';
     h += '<h3>QR code du questionnaire</h3><div id="qr" style="padding:8px 0"></div>';
