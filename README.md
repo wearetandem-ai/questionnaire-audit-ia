@@ -4,6 +4,8 @@ Formulaire web autonome utilisé par Tandem au démarrage d'un audit IA. Une pag
 
 URL de production : `https://wearetandem-ai.github.io/questionnaire-audit-ia/?c=<slug-client>`
 
+Tableau de bord temps réel (interne, protégé par clé) : `https://wearetandem-ai.github.io/questionnaire-audit-ia/dashboard.html?c=<slug-client>&key=<clé>`. La page ne contient aucun corrigé : elle affiche des résultats déjà interprétés par n8n et se rafraîchit toutes les 30 secondes.
+
 Paramètres d'URL :
 
 | Paramètre | Rôle |
@@ -18,12 +20,13 @@ Paramètres d'URL :
 2. Commit et push sur `main`. GitHub Pages publie en une à deux minutes.
 3. Ouvrir `…/?c=<slug>` et dérouler le questionnaire une fois en entier (envoyer une réponse de test : elle porte le slug du client et se filtre ensuite).
 4. Envoyer le lien aux collaborateurs (mail type dans le guide de déploiement interne).
-5. Exporter les réponses en CSV depuis n8n (workflow « Audit IA — Export CSV », clé interne) et coller dans le template de restitution.
+5. Suivre et restituer dans le tableau de bord (`dashboard.html?c=<slug>&key=…`) ; l'export CSV reste disponible pour un livrable Excel figé.
 
 ## Structure
 
 ```
-index.html            page unique
+index.html            page unique du questionnaire
+dashboard.html        tableau de bord temps réel (lecture de l'endpoint n8n /audit-ia/data)
 assets/app.js         rendu des questions, logique conditionnelle, brouillon local, envoi
 assets/style.css      styles, responsive, accessibilité
 data/questions.json   questions FR/EN (généré depuis la banque interne, sans corrigé : ne pas éditer à la main)

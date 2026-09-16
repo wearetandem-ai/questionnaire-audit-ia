@@ -4,10 +4,12 @@
   'use strict';
 
   var DEFAULT_WEBHOOK = 'https://n8n.wearetandem.ai/webhook/audit-ia/reponse';
+  var CONFIG_URL = 'https://n8n.wearetandem.ai/webhook/audit-ia/config';
   var VERSION = '1.0.0';
 
   var params = new URLSearchParams(location.search);
   var slug = (params.get('c') || 'demo').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || 'demo';
+  var mission = (params.get('m') || '').trim();
   var STORAGE_KEY = 'audit-ia-' + slug;
   var DONE_KEY = STORAGE_KEY + '-done';
 
@@ -377,6 +379,7 @@
     var payload = {
       response_id: state.response_id,
       client: slug,
+      mission_id: (CFG.mission && CFG.mission.mission_id) || '',
       lang: lang,
       duration_s: Math.round((Date.now() - state.started_at) / 1000),
       user_agent: navigator.userAgent,
@@ -408,12 +411,14 @@
 
   function init() {
     var bust = '?v=' + encodeURIComponent(VERSION);
+    var cfgUrl = CONFIG_URL + '?c=' + encodeURIComponent(slug) + (mission ? '&m=' + encodeURIComponent(mission) : '');
     Promise.all([
       fetch('data/questions.json' + bust).then(function (r) { if (!r.ok) throw new Error('questions'); return r.json(); }),
-      fetch('clients/' + slug + '.json' + bust).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      fetch(cfgUrl).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.ok !== false) ? j : null; }).catch(function () { return null; })
+        .then(function (c) { return c || fetch('clients/' + slug + '.json' + bust).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); })
     ]).then(function (res) {
       DATA = res[0]; CFG = res[1];
-      if (!CFG) {
+      if (!CFG || CFG.ok === false) {
         lang = params.get('lang') === 'en' ? 'en' : 'fr';
         return fail(lang === 'en'
           ? 'This link is not valid: the company code is unknown. Please use the link you were sent, or contact the person who sent it.'
@@ -422,6 +427,13 @@
       var langs = CFG.langues_disponibles || ['fr', 'en'];
       var wanted = params.get('lang');
       lang = (wanted && langs.indexOf(wanted) >= 0) ? wanted : (CFG.langue && langs.indexOf(CFG.langue) >= 0 ? CFG.langue : langs[0]);
+      if (CFG.mission && CFG.mission.statut && CFG.mission.statut !== 'en_ligne') {
+        $brandSub.textContent = CFG.entreprise || '';
+        var notOpen = CFG.mission.statut === 'brouillon';
+        return fail(lang === 'en'
+          ? (notOpen ? 'This survey is not open yet. Please use your link again on the announced date.' : 'This survey is now closed. Thank you for your interest.')
+          : (notOpen ? 'Ce questionnaire n’est pas encore ouvert. Revenez avec votre lien à la date indiquée.' : 'Ce questionnaire est désormais clôturé aux réponses. Merci de votre intérêt.'));
+      }
       $langToggle.addEventListener('click', function () {
         var idx = langs.indexOf(lang);
         lang = langs[(idx + 1) % langs.length];

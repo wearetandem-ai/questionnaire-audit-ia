@@ -135,13 +135,16 @@
    "label": "Mistral / Le Chat"
   },
   {
+   "id": "dust",
+   "label": "Dust"
+  },
+  {
    "id": "copilot_m365",
    "label": "Copilot (Microsoft 365)"
   },
   {
    "id": "copilot_code",
-   "label": "GitHub Copilot ou Cursor",
-   "label_en": "GitHub Copilot or Cursor"
+   "label": "GitHub Copilot"
   },
   {
    "id": "perplexity",
@@ -174,6 +177,7 @@
   "response_id",
   "submitted_at",
   "client",
+  "mission_id",
   "lang",
   "duration_s",
   "N1",
@@ -190,6 +194,7 @@
   "U3_claude",
   "U3_gemini",
   "U3_mistral",
+  "U3_dust",
   "U3_copilot_m365",
   "U3_copilot_code",
   "U3_perplexity",
@@ -423,10 +428,10 @@
     }
    ],
    "fr": {
-    "enonce": "À quelle fréquence utilisez-vous un outil d'IA générative (ChatGPT, Copilot, Claude, Gemini…) dans le cadre de votre travail ?"
+    "enonce": "À quelle fréquence utilisez-vous un outil d'IA générative (ChatGPT, Claude, Gemini, Dust, Mistral…) dans le cadre de votre travail ?"
    },
    "en": {
-    "enonce": "How often do you use a generative AI tool (ChatGPT, Copilot, Claude, Gemini…) for work?"
+    "enonce": "How often do you use a generative AI tool (ChatGPT, Claude, Gemini, Dust, Mistral…) for work?"
    }
   },
   {
@@ -945,10 +950,10 @@
     }
    ],
    "fr": {
-    "enonce": "Dans ChatGPT, Claude ou Copilot, on peut créer un « GPT personnalisé », un « projet » ou un « agent » dédié à un usage précis. De quoi s'agit-il concrètement ?"
+    "enonce": "Dans ChatGPT, Claude ou Dust, on peut créer un « GPT personnalisé », un « projet » ou un « agent » dédié à un usage précis. De quoi s'agit-il concrètement ?"
    },
    "en": {
-    "enonce": "In ChatGPT, Claude or Copilot, you can create a \"custom GPT\", a \"project\" or an \"agent\" for a specific use. What is it, concretely?"
+    "enonce": "In ChatGPT, Claude or Dust, you can create a \"custom GPT\", a \"project\" or an \"agent\" for a specific use. What is it, concretely?"
    }
   },
   {

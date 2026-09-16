@@ -105,9 +105,12 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
   'use strict';
   var DATA_URL = 'https://n8n.wearetandem.ai/webhook/audit-ia/data';
   var EXPORT_URL = 'https://n8n.wearetandem.ai/webhook/audit-ia/export';
+  var CONFIG_URL = 'https://n8n.wearetandem.ai/webhook/audit-ia/config';
   var REFRESH_MS = 30000;
   var params = new URLSearchParams(location.search);
   var slug = (params.get('c') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  var mission = (params.get('m') || '').trim();
+  var mq = mission ? '&m=' + encodeURIComponent(mission) : '';
   var key = params.get('key') || '';
   try { if (!key) key = sessionStorage.getItem('audit-ia-key-' + slug) || ''; else sessionStorage.setItem('audit-ia-key-' + slug, key); } catch (e) {}
   var $app = document.getElementById('app'), $tip = document.getElementById('tip');
@@ -337,7 +340,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
     var since = lastOk ? Math.round((Date.now() - lastOk) / 1000) : null;
     var h = '<header class="top"><div><h1>Tableau de bord : questionnaire IA</h1><div class="sub">' + esc(CFG.entreprise || slug) + ' · code ' + esc(slug) + '</div></div>';
     h += '<div class="status"><span class="dot' + (lastErr ? ' err' : (timer ? '' : ' off')) + '"></span><span id="since">' + (lastErr ? 'Erreur de rafraîchissement : ' + esc(lastErr) : 'Mis à jour il y a ' + (since === null ? '–' : since + ' s') + ', actualisation toutes les 30 s') + '</span>';
-    h += '<button type="button" class="btn" id="refresh">Actualiser</button><a class="btn" href="' + EXPORT_URL + '?c=' + encodeURIComponent(slug) + '&key=' + encodeURIComponent(key) + '">Télécharger le CSV</a><a class="btn" href="./?c=' + encodeURIComponent(slug) + '" target="_blank" rel="noopener">Ouvrir le questionnaire</a></div></header>';
+    h += '<button type="button" class="btn" id="refresh">Actualiser</button><a class="btn" href="' + EXPORT_URL + '?c=' + encodeURIComponent(slug) + mq + '&key=' + encodeURIComponent(key) + '">Télécharger le CSV</a><a class="btn" href="./?c=' + encodeURIComponent(slug) + mq + '" target="_blank" rel="noopener">Ouvrir le questionnaire</a></div></header>';
     h += filterBar(all);
     if (!all.length) { h += '<div class="card"><p class="empty">Aucune réponse reçue pour le moment pour ce client. Le tableau se remplira automatiquement dès la première soumission.</p></div>'; $app.innerHTML = h; bind(); return; }
     h += kpis(rows, all);
@@ -363,15 +366,15 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
     document.getElementById('k-go').addEventListener('click', function () {
       var s = document.getElementById('k-slug').value.toLowerCase().replace(/[^a-z0-9_-]/g, ''), k = document.getElementById('k-key').value.trim();
       if (!s || !k) return;
-      location.search = '?c=' + encodeURIComponent(s) + '&key=' + encodeURIComponent(k);
+      location.search = '?c=' + encodeURIComponent(s) + mq + '&key=' + encodeURIComponent(k);
     });
   }
   function load(manual) {
     if (!slug || !key) return askKey();
     var p = [];
     if (!Q) p.push(fetch('data/questions.json?v=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) { Q = j; }));
-    if (!CFG) p.push(fetch('clients/' + slug + '.json?v=' + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { CFG = j || {}; }).catch(function () { CFG = {}; }));
-    p.push(fetch(DATA_URL + '?c=' + encodeURIComponent(slug) + '&key=' + encodeURIComponent(key) + '&_=' + Date.now()).then(function (r) { if (r.status === 403) throw new Error('403'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) { DATA = j; }));
+    if (!CFG) p.push(fetch(CONFIG_URL + '?c=' + encodeURIComponent(slug) + mq).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return (j && j.ok !== false) ? j : fetch('clients/' + slug + '.json?v=' + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }); }).then(function (j) { CFG = j || {}; }).catch(function () { CFG = {}; }));
+    p.push(fetch(DATA_URL + '?c=' + encodeURIComponent(slug) + mq + '&key=' + encodeURIComponent(key) + '&_=' + Date.now()).then(function (r) { if (r.status === 403) throw new Error('403'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (j) { DATA = j; }));
     Promise.all(p).then(function () { lastOk = Date.now(); lastErr = null; render(); schedule(); })
       .catch(function (e) {
         if (String(e.message) === '403') { try { sessionStorage.removeItem('audit-ia-key-' + slug); } catch (x) {} return askKey('Clé refusée ou code client inconnu. Vérifiez les deux valeurs.'); }
