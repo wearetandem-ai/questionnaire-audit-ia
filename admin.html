@@ -46,6 +46,11 @@
   .flex { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
   hr { border:none; border-top:1px solid var(--line); margin:16px 0; }
   .mt0 { margin-top:0; }
+  .baro { display:inline-block; width:70px; height:7px; border-radius:4px; background:#e7eaf1; overflow:hidden; vertical-align:middle; margin-right:6px; }
+  .barf { height:100%; border-radius:4px; }
+  .kpis { display:flex; gap:22px; flex-wrap:wrap; }
+  .kpi .n { font-size:22px; font-weight:700; color:var(--navy); }
+  .kpi .l { font-size:12px; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -71,6 +76,15 @@
   function toast(m) { $toast.textContent = m; $toast.classList.add('show'); setTimeout(function () { $toast.classList.remove('show'); }, 2200); }
   function copy(t) { try { navigator.clipboard.writeText(t); toast('Copié'); } catch (e) { toast('Copie impossible'); } }
   window.__copy = copy;
+
+  // ---- suivi du taux de complétion ----
+  function taux(count, eff) { return eff > 0 ? Math.round((count || 0) / eff * 100) : null; }
+  function tauxBar(count, eff) {
+    var p = taux(count, eff);
+    if (p == null) return '<span class="muted">— pas d\'effectif</span>';
+    var col = p >= 60 ? 'var(--ok)' : p >= 30 ? 'var(--warn)' : 'var(--err)';
+    return '<span class="baro"><span class="barf" style="width:' + Math.min(100, p) + '%;background:' + col + '"></span></span><span class="muted">' + p + '%</span>';
+  }
 
   function api(action, payload) {
     return fetch(API + '/' + action, {
@@ -123,11 +137,27 @@
   function renderMain() {
     var h = '<header class="top"><h1>Console Audit IA — Tandem</h1><div class="flex" style="gap:12px"><span class="who">' + state.clients.length + ' client(s)</span>' +
       '<button class="btn ghost sm" id="logout">Se déconnecter</button></div></header><main>';
+    // bandeau global Tandem : cumul sur les campagnes en ligne de tous les clients
+    var gResp = 0, gInv = 0, gOpen = 0;
+    state.clients.forEach(function (c) {
+      if (c.archived) return;
+      (c.missions || []).forEach(function (m) {
+        if (m.statut !== 'en_ligne') return;
+        gOpen++; gResp += (m.count || 0); gInv += (m.effectif_invite || 0);
+      });
+    });
+    var gTaux = taux(gResp, gInv);
+    h += '<div class="card"><div class="kpis">' +
+      '<div class="kpi"><div class="n">' + gOpen + '</div><div class="l">campagne(s) en ligne</div></div>' +
+      '<div class="kpi"><div class="n">' + gResp + '</div><div class="l">réponses collectées</div></div>' +
+      '<div class="kpi"><div class="n">' + (gInv || '—') + '</div><div class="l">collaborateurs invités</div></div>' +
+      '<div class="kpi"><div class="n">' + (gTaux == null ? '—' : gTaux + '%') + '</div><div class="l">taux de complétion global</div></div>' +
+      '</div></div>';
     h += '<div class="card"><div class="flex"><h2 class="mt0">Clients</h2><button class="btn" id="new">+ Nouveau client</button></div>';
     if (!state.clients.length) {
       h += '<p class="empty">Aucun client. Créez le premier avec « Nouveau client ».</p>';
     } else {
-      h += '<table><thead><tr><th>Entreprise</th><th>Code</th><th>Campagne active</th><th>Réponses</th><th>Actions</th></tr></thead><tbody>';
+      h += '<table><thead><tr><th>Entreprise</th><th>Code</th><th>Campagne active</th><th>Réponses</th><th>Taux</th><th>Actions</th></tr></thead><tbody>';
       state.clients.forEach(function (c, i) {
         var m = activeMission(c);
         var count = m ? (m.count || 0) : (c.missions || []).reduce(function (n, x) { return n + (x.count || 0); }, 0);
@@ -136,6 +166,7 @@
           '<td><span class="keyval">' + esc(c.slug) + '</span></td>' +
           '<td>' + (m ? esc(m.libelle || 'Campagne') + ' ' + statutBadge(m.statut) : '<span class="muted">aucune</span>') + '</td>' +
           '<td><strong>' + count + '</strong>' + (m && m.effectif_invite ? ' <span class="muted">/ ' + m.effectif_invite + '</span>' : '') + '</td>' +
+          '<td>' + (m ? tauxBar(count, m.effectif_invite) : '<span class="muted">—</span>') + '</td>' +
           '<td><button class="btn ghost sm" data-edit="' + i + '">Éditer</button> ' +
           '<button class="btn ghost sm" data-miss="' + i + '">Campagnes</button> ' +
           '<button class="btn ghost sm" data-links="' + i + '">Liens</button></td></tr>';
@@ -227,13 +258,14 @@
     h += '<div class="flex"><h2 class="mt0">Campagnes</h2></div>';
     if (!ms.length) h += '<p class="empty">Aucune campagne.</p>';
     else {
-      h += '<table><thead><tr><th>Libellé</th><th>Statut</th><th>Réponses</th><th>Effectif</th><th>Actions</th></tr></thead><tbody>';
+      h += '<table><thead><tr><th>Libellé</th><th>Statut</th><th>Réponses</th><th>Effectif</th><th>Taux</th><th>Actions</th></tr></thead><tbody>';
       ms.forEach(function (m) {
         h += '<tr><td>' + esc(m.libelle || '') + '<br><span class="muted keyval">' + esc(m.mission_id) + '</span></td>' +
           '<td><select data-stat="' + esc(m.mission_id) + '">' +
           ['brouillon', 'en_ligne', 'cloturee', 'archivee'].map(function (s) { return '<option value="' + s + '"' + (m.statut === s ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></td>' +
           '<td><strong>' + (m.count || 0) + '</strong></td>' +
           '<td><input type="number" data-eff="' + esc(m.mission_id) + '" value="' + (m.effectif_invite || 0) + '" style="width:80px"></td>' +
+          '<td>' + tauxBar(m.count, m.effectif_invite) + '</td>' +
           '<td><button class="btn ghost sm" data-savem="' + esc(m.mission_id) + '">Enregistrer</button></td></tr>';
       });
       h += '</tbody></table>';
@@ -272,6 +304,8 @@
     var dashU = PAGES + 'dashboard.html?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
     var expU = 'https://n8n.wearetandem.ai/webhook/audit-ia/export?c=' + encodeURIComponent(c.slug) + (mid ? '&m=' + encodeURIComponent(mid) : '') + '&key=' + encodeURIComponent(c.client_key || '');
     var mail = 'Objet : 15 minutes pour préparer notre plan IA\n\nBonjour à toutes et à tous,\n\nNous démarrons un état des lieux de nos usages de l\'intelligence artificielle, accompagnés par le cabinet Tandem. Première étape : un questionnaire de 12 à 15 minutes, ouvert à tout le monde, à remplir d\'ici le [DATE].\n\nIl n\'y a ni bonne ni mauvaise réponse et ce n\'est pas une évaluation. Les réponses sont ' + (c.nominatif ? 'nominatives (réservées aux RH)' : 'anonymes') + '.\n\nLien : ' + formU + '\n\nMerci de votre participation.';
+    var mCount = m ? (m.count || 0) : 0, mEff = m ? (m.effectif_invite || 0) : 0, mTaux = taux(mCount, mEff);
+    var relance = 'Objet : Rappel — questionnaire IA (quelques minutes)\n\nBonjour à toutes et à tous,\n\n' + (mTaux != null ? 'Merci aux ' + mCount + ' personnes qui ont déjà répondu (' + mTaux + ' % des invités). ' : 'Merci à celles et ceux qui ont déjà répondu. ') + 'Si ce n\'est pas encore fait, il reste quelques jours pour compléter le questionnaire, d\'ici le [DATE]. Il prend 12 à 15 minutes et vos réponses sont ' + (c.nominatif ? 'nominatives (réservées aux RH)' : 'anonymes') + '.\n\nLien : ' + formU + '\n\nMerci beaucoup pour votre participation.';
     var h = '<header class="top"><h1>Liens — ' + esc(c.entreprise || c.slug) + '</h1><button class="btn ghost sm" id="back">← Retour</button></header><main><div class="card">';
     h += '<h2 class="mt0">Campagne : ' + (m ? esc(m.libelle) + ' ' + statutBadge(m.statut) : '<span class="muted">aucune</span>') + '</h2>';
     function line(lab, u) { return '<h3>' + lab + '</h3><div class="links"><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u) + '</a></div><button class="btn ghost sm" onclick="window.__copy(\'' + esc(u).replace(/'/g, "\\'") + '\')">Copier</button>'; }
@@ -280,7 +314,9 @@
     h += line('Export CSV', expU);
     h += '<h3>Clé dashboard</h3><p><span class="keyval">' + esc(c.client_key || '—') + '</span> <button class="btn ghost sm" onclick="window.__copy(\'' + esc(c.client_key || '') + '\')">Copier</button></p>';
     h += '<h3>QR code du questionnaire</h3><div id="qr" style="padding:8px 0"></div>';
+    h += '<h3>Suivi de la campagne</h3><p>' + (m ? '<strong>' + mCount + '</strong>' + (mEff ? ' / ' + mEff + ' invités &nbsp; ' + tauxBar(mCount, mEff) : ' réponses <span class="muted">(effectif non renseigné)</span>') : '<span class="muted">aucune campagne active</span>') + '</p>';
     h += '<h3>Modèle de mail d\'envoi</h3><textarea id="mail" style="min-height:220px">' + esc(mail) + '</textarea><div style="margin-top:6px"><button class="btn ghost sm" onclick="window.__copy(document.getElementById(\'mail\').value)">Copier le mail</button></div>';
+    h += '<h3>Modèle de mail de relance</h3><textarea id="relance" style="min-height:180px">' + esc(relance) + '</textarea><div style="margin-top:6px"><button class="btn ghost sm" onclick="window.__copy(document.getElementById(\'relance\').value)">Copier la relance</button></div>';
     h += '</div></main>';
     $app.innerHTML = h;
     document.getElementById('back').onclick = renderMain;
