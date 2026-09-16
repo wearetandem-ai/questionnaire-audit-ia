@@ -78,6 +78,7 @@
   window.__copy = copy;
 
   // ---- suivi du taux de complétion ----
+  function pct(x, n) { return n ? Math.round(x / n * 100) : 0; }
   function taux(count, eff) { return eff > 0 ? Math.round((count || 0) / eff * 100) : null; }
   function tauxBar(count, eff) {
     var p = taux(count, eff);
@@ -136,6 +137,7 @@
 
   function renderMain() {
     var h = '<header class="top"><h1>Console Audit IA — Tandem</h1><div class="flex" style="gap:12px"><span class="who">' + state.clients.length + ' client(s)</span>' +
+      '<button class="btn ghost sm" id="tandem">Vue Tandem</button>' +
       '<button class="btn ghost sm" id="logout">Se déconnecter</button></div></header><main>';
     // bandeau global Tandem : cumul sur les campagnes en ligne de tous les clients
     var gResp = 0, gInv = 0, gOpen = 0;
@@ -176,6 +178,7 @@
     h += '</div></main>';
     $app.innerHTML = h;
     document.getElementById('logout').onclick = function () { try { sessionStorage.removeItem('audit-ia-admin'); } catch (e) {} key = ''; renderLogin(); };
+    document.getElementById('tandem').onclick = openStats;
     document.getElementById('new').onclick = function () { state.editing = { _new: true, langues_disponibles: ['fr', 'en'], langue: 'fr', nominatif: false, directions: [], outils_supplementaires: [], outils_fournis: [], intro_complement: { fr: '', en: '' } }; renderClientForm(); };
     $app.querySelectorAll('[data-edit]').forEach(function (b) { b.onclick = function () { state.editing = JSON.parse(JSON.stringify(state.clients[+b.getAttribute('data-edit')])); renderClientForm(); }; });
     $app.querySelectorAll('[data-miss]').forEach(function (b) { b.onclick = function () { state.missionsFor = state.clients[+b.getAttribute('data-miss')].slug; renderMissions(); }; });
@@ -325,6 +328,83 @@
     qr.onload = function () { try { new QRCode(document.getElementById('qr'), { text: formU, width: 150, height: 150 }); } catch (e) {} };
     qr.onerror = function () { document.getElementById('qr').innerHTML = '<span class="muted">QR indisponible (réseau).</span>'; };
     document.body.appendChild(qr);
+  }
+
+  // ---------------------------------------------------------------- vue Tandem (multi-clients)
+  function openStats() {
+    $app.innerHTML = '<main><div class="card"><p class="empty">Calcul des statistiques…</p></div></main>';
+    api('stats').then(renderStats).catch(function (e) {
+      if (String(e.message) === '403') { try { sessionStorage.removeItem('audit-ia-admin'); } catch (x) {} key = ''; return renderLogin('Clé admin refusée.'); }
+      $app.innerHTML = '<main><div class="card"><p class="empty">Erreur (' + esc(e.message) + '). <button class="btn sm" id="retry">Réessayer</button></p></div></main>';
+      var r = document.getElementById('retry'); if (r) r.onclick = openStats;
+    });
+  }
+
+  function group(clients, field) {
+    var map = {};
+    clients.forEach(function (c) {
+      var k = (c[field] || '').trim() || '— non renseigné';
+      var g = map[k] || (map[k] = { key: k, nc: 0, n: 0, sumScore: 0, users: 0, shadow: 0, sensible: 0 });
+      g.nc++; g.n += c.n; g.sumScore += (c.score_moyen || 0) * c.n; g.users += c.users; g.shadow += c.shadow; g.sensible += c.sensible;
+    });
+    return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return b.n - a.n; });
+  }
+
+  function benchTable(title, rows) {
+    if (!rows.length) return '';
+    var h = '<h3>' + title + '</h3><table><thead><tr><th>' + (title.indexOf('secteur') >= 0 ? 'Secteur' : 'Tranche') + '</th><th>Clients</th><th>Réponses</th><th>Score moyen</th><th>Utilisateurs</th><th>Shadow AI</th><th>Données sensibles</th></tr></thead><tbody>';
+    rows.forEach(function (g) {
+      h += '<tr><td><strong>' + esc(g.key) + '</strong></td><td>' + g.nc + '</td><td>' + g.n + '</td>' +
+        '<td>' + (g.n ? Math.round(g.sumScore / g.n * 10) / 10 : 0) + '</td>' +
+        '<td>' + pct(g.users, g.n) + ' %</td><td>' + pct(g.shadow, g.n) + ' %</td><td>' + pct(g.sensible, g.n) + ' %</td></tr>';
+    });
+    return h + '</tbody></table>';
+  }
+
+  function renderStats(res) {
+    var g = (res && res.global) || { clients: 0, n: 0, score_moyen: 0, lv: {}, users: 0, shadow: 0, sensible: 0 };
+    var cs = (res && res.clients) || [];
+    var lv = g.lv || {};
+    var h = '<header class="top"><h1>Vue Tandem — tous les clients</h1><button class="btn ghost sm" id="back">← Retour</button></header><main>';
+    h += '<div class="card"><div class="kpis">' +
+      '<div class="kpi"><div class="n">' + g.clients + '</div><div class="l">clients actifs</div></div>' +
+      '<div class="kpi"><div class="n">' + g.n + '</div><div class="l">réponses (campagnes actives)</div></div>' +
+      '<div class="kpi"><div class="n">' + g.score_moyen + '</div><div class="l">score compétence moyen /100</div></div>' +
+      '<div class="kpi"><div class="n">' + pct(lv['Avancé'] || 0, g.n) + '%</div><div class="l">avancés</div></div>' +
+      '<div class="kpi"><div class="n">' + pct(g.users, g.n) + '%</div><div class="l">utilisateurs d\'IA</div></div>' +
+      '<div class="kpi"><div class="n">' + pct(g.shadow, g.n) + '%</div><div class="l">shadow AI</div></div>' +
+      '<div class="kpi"><div class="n">' + pct(g.sensible, g.n) + '%</div><div class="l">données sensibles</div></div>' +
+      '</div><p class="muted" style="margin:10px 0 0">Snapshot de la campagne active de chaque client. Généré ' + esc((res.generated_at || '').slice(0, 16).replace('T', ' à ')) + '.</p></div>';
+
+    h += '<div class="card"><h2 class="mt0">Par client</h2>';
+    if (!cs.length) h += '<p class="empty">Aucun client actif.</p>';
+    else {
+      h += '<table><thead><tr><th>Entreprise</th><th>Secteur</th><th>Tranche</th><th>Campagne</th><th>Réponses</th><th>Taux</th><th>Score /100</th><th>Avancés</th><th>Débutants</th><th>Users</th><th>Shadow AI</th><th>Sensibles</th></tr></thead><tbody>';
+      cs.forEach(function (c) {
+        var cl = c.lv || {};
+        h += '<tr><td><strong>' + esc(c.entreprise || c.slug) + '</strong></td>' +
+          '<td>' + (c.secteur ? esc(c.secteur) : '<span class="muted">—</span>') + '</td>' +
+          '<td>' + (c.tranche_effectif ? esc(c.tranche_effectif) : '<span class="muted">—</span>') + '</td>' +
+          '<td>' + (c.campagne ? esc(c.campagne) : '<span class="muted">—</span>') + '</td>' +
+          '<td><strong>' + c.n + '</strong>' + (c.effectif ? ' <span class="muted">/ ' + c.effectif + '</span>' : '') + '</td>' +
+          '<td>' + tauxBar(c.n, c.effectif) + '</td>' +
+          '<td>' + (c.n ? c.score_moyen : '<span class="muted">—</span>') + '</td>' +
+          '<td>' + pct(cl['Avancé'] || 0, c.n) + ' %</td>' +
+          '<td>' + pct(cl['Débutant'] || 0, c.n) + ' %</td>' +
+          '<td>' + pct(c.users, c.n) + ' %</td>' +
+          '<td>' + pct(c.shadow, c.n) + ' %</td>' +
+          '<td>' + pct(c.sensible, c.n) + ' %</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    var withData = cs.filter(function (c) { return c.n > 0; });
+    var bh = benchTable('Benchmark par secteur', group(withData, 'secteur')) + benchTable('Benchmark par tranche d\'effectif', group(withData, 'tranche_effectif'));
+    if (bh) h += '<div class="card"><h2 class="mt0">Benchmarks</h2><p class="muted" style="margin:0 0 12px">Moyennes pondérées par le nombre de réponses. Renseignez secteur et tranche d\'effectif dans la fiche client pour affiner.</p>' + bh + '</div>';
+
+    h += '</main>';
+    $app.innerHTML = h;
+    document.getElementById('back').onclick = renderMain;
   }
 
   // ---------------------------------------------------------------- boot
