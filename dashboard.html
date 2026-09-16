@@ -24,6 +24,8 @@ a { color: var(--navy); }
 .wrap { max-width: 1240px; margin: 0 auto; }
 header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 10px; }
 header h1 { font-size: 22px; margin: 0; color: var(--navy); }
+.brand-lockup { display: flex; align-items: center; gap: 14px; }
+.brandmark { font-weight: 800; letter-spacing: .16em; text-transform: uppercase; font-size: 15px; color: var(--navy); white-space: nowrap; }
 header .sub { color: var(--ink-2); font-size: 14px; }
 .status { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
@@ -339,7 +341,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
   function render() {
     var all = DATA.rows, rows = applyFilters(all);
     var since = lastOk ? Math.round((Date.now() - lastOk) / 1000) : null;
-    var h = '<header class="top"><div><h1>Tableau de bord : questionnaire IA</h1><div class="sub">' + esc(CFG.entreprise || slug) + ' · code ' + esc(slug) + '</div></div>';
+    var h = '<header class="top"><div class="brand-lockup"><span class="brandmark">Tandem</span><div><h1>Tableau de bord : questionnaire IA</h1><div class="sub">' + esc(CFG.entreprise || slug) + ' · code ' + esc(slug) + '</div></div></div>';
     h += '<div class="status"><span class="dot' + (lastErr ? ' err' : (timer ? '' : ' off')) + '"></span><span id="since">' + (lastErr ? 'Erreur de rafraîchissement : ' + esc(lastErr) : 'Mis à jour il y a ' + (since === null ? '–' : since + ' s') + ', actualisation toutes les 30 s') + '</span>';
     h += '<button type="button" class="btn" id="refresh">Actualiser</button><a class="btn" href="' + EXPORT_URL + '?c=' + encodeURIComponent(slug) + mq + '&key=' + encodeURIComponent(key) + '">Télécharger le CSV</a><a class="btn" href="./?c=' + encodeURIComponent(slug) + mq + '" target="_blank" rel="noopener">Ouvrir le questionnaire</a></div></header>';
     h += missionBar();

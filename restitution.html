@@ -24,6 +24,9 @@ a { color: var(--navy); }
 .wrap { max-width: 1000px; margin: 0 auto; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 4px; }
 .toolbar .who { color: var(--ink-2); font-size: 13px; }
+.brand-lockup { display: flex; align-items: center; gap: 12px; }
+.brandmark { font-weight: 800; letter-spacing: .16em; text-transform: uppercase; font-size: 14px; color: var(--ink); }
+.cover .brandmark { display: block; color: #fff; font-size: 15px; margin-bottom: 16px; }
 .btn { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; text-decoration: none; }
 .btn.ghost { background: var(--surface); color: var(--navy); border-color: var(--grid); }
 .btn:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
@@ -169,7 +172,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
   function cover() {
     var m = CFG.mission || null;
     var when = (DATA.generated_at || '').slice(0, 10);
-    return '<div class="cover"><div class="kick">Tandem · Audit des usages de l\'intelligence artificielle</div>' +
+    return '<div class="cover"><span class="brandmark">Tandem</span><div class="kick">Audit des usages de l\'intelligence artificielle</div>' +
       '<h1>Restitution : état des lieux des usages IA</h1>' +
       '<div class="meta"><b>' + esc(CFG.entreprise || slug) + '</b>' + (m && m.libelle ? ' — campagne « ' + esc(m.libelle) + ' »' : '') + '<br>' +
       DATA.rows.length + ' répondant(s)' + (CFG.effectif_invite ? ' sur ' + CFG.effectif_invite + ' invités (taux ' + fmtPct(DATA.rows.length, CFG.effectif_invite) + ')' : '') + '<br>' +
@@ -338,7 +341,7 @@ details summary { cursor: pointer; color: var(--navy); font-weight: 600; }
   // ---------------------------------------------------------------- rendu
   function render() {
     var rows = DATA.rows;
-    var h = '<div class="toolbar noprint"><span class="who">' + esc(CFG.entreprise || slug) + ' · restitution</span><div><button type="button" class="btn ghost" id="refresh">Actualiser</button> <button type="button" class="btn" id="print">Imprimer / PDF</button></div></div>';
+    var h = '<div class="toolbar noprint"><div class="brand-lockup"><span class="brandmark">Tandem</span><span class="who">' + esc(CFG.entreprise || slug) + ' · restitution</span></div><div><button type="button" class="btn ghost" id="refresh">Actualiser</button> <button type="button" class="btn" id="print">Imprimer / PDF</button></div></div>';
     h += cover();
     if (!rows.length) {
       h += '<div class="card"><p class="empty">Aucune réponse pour cette campagne : la restitution se remplira automatiquement dès les premières soumissions.</p></div>';
