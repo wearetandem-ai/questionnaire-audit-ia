@@ -48,7 +48,7 @@
   "en": {
    "intro_titre": "Your use of AI and your expectations",
    "intro_texte": "This survey takes 12 to 15 minutes. It helps us understand how artificial intelligence is used in the company today, what people know about it, and where it could save you time. It is not a test: answer with what you actually think or do. When you don't know, choose \"I don't know\"; that is a useful answer.",
-   "intro_pseudo": "Your answers are pseudonymised: we do not collect your name or e-mail address. Results are analysed by department, job family and seniority, never individually, and are not shared with your manager.",
+   "intro_pseudo": "Your answers are anonymised: we do not collect your name or e-mail address. Results are analysed by department, job family and seniority, never individually, and are not shared with your manager.",
    "intro_nominatif": "Your name and e-mail are requested by your company so that a suitable training path can be offered to you afterwards. They are not shared with your manager and are not used for any assessment.",
    "commencer": "Start",
    "precedent": "Back",
@@ -72,7 +72,7 @@
    "echelle_5": "Strongly agree",
    "nsp": "I don't know",
    "bloc_libre_intro": "These five questions are optional but they are the most useful to us: they feed directly into improvement ideas. A few words are enough.",
-   "bloc_usage_intro": "Reminder: your answers are pseudonymised. Describe what you actually do, including with tools the company does not provide.",
+   "bloc_usage_intro": "Reminder: your answers are anonymised. Describe what you actually do, including with tools the company does not provide.",
    "bloc_connaissance_intro": "Eight questions about how these tools work. There is no trick: if you don't know, say so.",
    "bloc_scenario_intro": "Ten everyday work situations. For each one, pick the reaction that seems best to you.",
    "bloc_posture_intro": "Four statements: tell us how much you agree.",
@@ -546,7 +546,7 @@
    },
    "en": {
     "enonce": "What kinds of information have you already typed or pasted into an AI tool?",
-    "aide": "Select all that apply. Reminder: answers are pseudonymised."
+    "aide": "Select all that apply. Reminder: answers are anonymised."
    }
   },
   {
