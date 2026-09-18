@@ -14,7 +14,7 @@
  "ui": {
   "fr": {
    "intro_titre": "Vos usages et vos attentes vis-à-vis de l'IA",
-   "intro_texte": "Ce questionnaire prend 12 à 15 minutes. Il sert à comprendre comment l'intelligence artificielle est utilisée aujourd'hui dans l'entreprise, ce que chacun en connaît et ce qui pourrait vous faire gagner du temps. Il ne s'agit pas d'un examen : répondez ce que vous pensez ou faites vraiment. Quand vous ne savez pas, choisissez « Je ne sais pas », c'est une réponse utile.",
+   "intro_texte": "Ce questionnaire prend 12 à 15 minutes. Il sert à identifier les besoins de formation, à situer les niveaux d'usage de l'IA dans l'entreprise et à faire remonter des cas d'usage concrets en vue du déploiement d'un outil. Ce n'est pas une évaluation des personnes : aucune réponse n'est utilisée pour évaluer qui que ce soit. Répondez ce que vous pensez ou faites vraiment ; quand vous ne savez pas, choisissez « Je ne sais pas », c'est une réponse utile.",
    "intro_pseudo": "Vos réponses sont pseudonymisées : nous ne collectons ni votre nom ni votre adresse e-mail. Les résultats sont analysés par direction, métier et ancienneté, jamais individuellement, et ne sont pas transmis à votre manager.",
    "intro_nominatif": "Vos nom et e-mail sont demandés à la demande de votre entreprise, pour vous proposer ensuite un parcours de formation adapté. Ils ne sont pas transmis à votre manager et ne servent à aucune évaluation.",
    "commencer": "Commencer",
@@ -39,7 +39,7 @@
    "echelle_5": "Tout à fait d'accord",
    "nsp": "Je ne sais pas",
    "bloc_libre_intro": "Ces cinq questions sont facultatives mais ce sont les plus utiles pour nous : elles alimentent directement les pistes d'amélioration. Quelques mots suffisent.",
-   "bloc_usage_intro": "Rappel : vos réponses sont pseudonymisées. Décrivez ce que vous faites vraiment, y compris avec des outils que l'entreprise ne fournit pas.",
+   "bloc_usage_intro": "Décrivez ce que vous faites vraiment, y compris avec des outils que l'entreprise ne fournit pas.",
    "bloc_connaissance_intro": "Huit questions pour comprendre comment ces outils fonctionnent. Il n'y a pas de piège : si vous ne savez pas, dites-le.",
    "bloc_scenario_intro": "Dix situations de travail courantes. Pour chacune, choisissez la réaction qui vous semble la meilleure.",
    "bloc_posture_intro": "Quatre affirmations : indiquez à quel point vous êtes d'accord.",
@@ -47,7 +47,7 @@
   },
   "en": {
    "intro_titre": "Your use of AI and your expectations",
-   "intro_texte": "This survey takes 12 to 15 minutes. It helps us understand how artificial intelligence is used in the company today, what people know about it, and where it could save you time. It is not a test: answer with what you actually think or do. When you don't know, choose \"I don't know\"; that is a useful answer.",
+   "intro_texte": "This survey takes 12 to 15 minutes. It is used to identify training needs, to map how AI is used across the company, and to gather concrete use cases ahead of rolling out a tool. It is not an assessment of individuals: no answer is used to evaluate anyone. Answer with what you actually think or do; when you don't know, choose “I don't know”, that is a useful answer.",
    "intro_pseudo": "Your answers are anonymised: we do not collect your name or e-mail address. Results are analysed by department, job family and seniority, never individually, and are not shared with your manager.",
    "intro_nominatif": "Your name and e-mail are requested by your company so that a suitable training path can be offered to you afterwards. They are not shared with your manager and are not used for any assessment.",
    "commencer": "Start",
@@ -72,7 +72,7 @@
    "echelle_5": "Strongly agree",
    "nsp": "I don't know",
    "bloc_libre_intro": "These five questions are optional but they are the most useful to us: they feed directly into improvement ideas. A few words are enough.",
-   "bloc_usage_intro": "Reminder: your answers are anonymised. Describe what you actually do, including with tools the company does not provide.",
+   "bloc_usage_intro": "Describe what you actually do, including with tools the company does not provide.",
    "bloc_connaissance_intro": "Eight questions about how these tools work. There is no trick: if you don't know, say so.",
    "bloc_scenario_intro": "Ten everyday work situations. For each one, pick the reaction that seems best to you.",
    "bloc_posture_intro": "Four statements: tell us how much you agree.",
@@ -127,38 +127,9 @@
    "label": "Claude"
   },
   {
-   "id": "gemini",
-   "label": "Gemini"
-  },
-  {
-   "id": "mistral",
-   "label": "Mistral / Le Chat"
-  },
-  {
-   "id": "dust",
-   "label": "Dust"
-  },
-  {
-   "id": "copilot_m365",
-   "label": "Copilot (Microsoft 365)"
-  },
-  {
-   "id": "copilot_code",
-   "label": "GitHub Copilot"
-  },
-  {
-   "id": "perplexity",
-   "label": "Perplexity"
-  },
-  {
-   "id": "notion_ai",
-   "label": "Notion AI"
-  },
-  {
-   "id": "metier",
-   "label": "IA intégrée à un outil métier",
-   "label_en": "AI built into a business tool",
-   "preciser": true
+   "id": "copilot",
+   "label": "Copilot",
+   "label_en": "Copilot"
   },
   {
    "id": "autre",
@@ -180,26 +151,20 @@
   "mission_id",
   "lang",
   "duration_s",
+  "prenom",
   "N1",
   "N2",
+  "equipe",
   "P1",
   "P2",
   "P3",
   "P4",
   "U1",
   "U2",
-  "U2_metier_precision",
   "U2_autre_precision",
   "U3_chatgpt",
   "U3_claude",
-  "U3_gemini",
-  "U3_mistral",
-  "U3_dust",
-  "U3_copilot_m365",
-  "U3_copilot_code",
-  "U3_perplexity",
-  "U3_notion_ai",
-  "U3_metier",
+  "U3_copilot",
   "U3_autre",
   "U4",
   "U5",
@@ -241,25 +206,40 @@
  ],
  "questions": [
   {
-   "id": "N1",
+   "id": "prenom",
    "bloc": 0,
    "type": "text_court",
-   "required": false,
+   "required": true,
    "condition": {
     "config": "nominatif"
    },
    "fr": {
-    "enonce": "Votre nom et prénom"
+    "enonce": "Votre prénom"
    },
    "en": {
-    "enonce": "Your name"
+    "enonce": "Your first name"
+   }
+  },
+  {
+   "id": "N1",
+   "bloc": 0,
+   "type": "text_court",
+   "required": true,
+   "condition": {
+    "config": "nominatif"
+   },
+   "fr": {
+    "enonce": "Votre nom"
+   },
+   "en": {
+    "enonce": "Your last name"
    }
   },
   {
    "id": "N2",
    "bloc": 0,
    "type": "email",
-   "required": false,
+   "required": true,
    "condition": {
     "config": "nominatif"
    },
@@ -271,16 +251,30 @@
    }
   },
   {
-   "id": "P1",
+   "id": "equipe",
    "bloc": 0,
-   "type": "single",
+   "type": "text_court",
    "required": true,
-   "options_from": "directions",
+   "condition": {
+    "config": "nominatif"
+   },
    "fr": {
-    "enonce": "Dans quelle direction ou quel service travaillez-vous ?"
+    "enonce": "Votre équipe"
    },
    "en": {
-    "enonce": "Which department or team do you work in?"
+    "enonce": "Your team"
+   }
+  },
+  {
+   "id": "P1",
+   "bloc": 0,
+   "type": "text_court",
+   "required": true,
+   "fr": {
+    "enonce": "Dans quelle direction, quel service ou quelle équipe travaillez-vous ?"
+   },
+   "en": {
+    "enonce": "Which department, team or unit do you work in?"
    }
   },
   {
@@ -428,10 +422,10 @@
     }
    ],
    "fr": {
-    "enonce": "À quelle fréquence utilisez-vous un outil d'IA générative (ChatGPT, Claude, Gemini, Dust, Mistral…) dans le cadre de votre travail ?"
+    "enonce": "À quelle fréquence utilisez-vous un outil d'IA générative (ChatGPT, Claude, Copilot…) dans le cadre de votre travail ?"
    },
    "en": {
-    "enonce": "How often do you use a generative AI tool (ChatGPT, Claude, Gemini, Dust, Mistral…) for work?"
+    "enonce": "How often do you use a generative AI tool (ChatGPT, Claude, Copilot…) for work?"
    }
   },
   {
@@ -503,10 +497,14 @@
    },
    "options": [
     {
-     "id": "rien",
-     "fr": "Rien de sensible (questions générales, textes déjà publics)",
-     "en": "Nothing sensitive (general questions, already public text)",
-     "exclusif": true
+     "id": "general",
+     "fr": "Des questions générales, sans données propres à l'entreprise",
+     "en": "General questions, with no company-specific data"
+    },
+    {
+     "id": "public",
+     "fr": "Des informations déjà publiques (disponibles sur internet)",
+     "en": "Information that is already public (available on the internet)"
     },
     {
      "id": "interne",
@@ -542,11 +540,11 @@
    ],
    "fr": {
     "enonce": "Quels types d'informations avez-vous déjà saisis ou collés dans un outil d'IA ?",
-    "aide": "Plusieurs réponses possibles. Rappel : les réponses sont pseudonymisées."
+    "aide": "Plusieurs réponses possibles."
    },
    "en": {
     "enonce": "What kinds of information have you already typed or pasted into an AI tool?",
-    "aide": "Select all that apply. Reminder: answers are anonymised."
+    "aide": "Select all that apply."
    }
   },
   {
@@ -842,10 +840,10 @@
     }
    ],
    "fr": {
-    "enonce": "Quand vous posez une question à un assistant comme ChatGPT, Claude ou Gemini, comment produit-il sa réponse ?"
+    "enonce": "Quand vous posez une question à un assistant comme ChatGPT, Claude ou Copilot, comment produit-il sa réponse ?"
    },
    "en": {
-    "enonce": "When you ask a question to an assistant such as ChatGPT, Claude or Gemini, how does it produce its answer?"
+    "enonce": "When you ask a question to an assistant such as ChatGPT, Claude or Copilot, how does it produce its answer?"
    }
   },
   {
@@ -950,10 +948,10 @@
     }
    ],
    "fr": {
-    "enonce": "Dans ChatGPT, Claude ou Dust, on peut créer un « GPT personnalisé », un « projet » ou un « agent » dédié à un usage précis. De quoi s'agit-il concrètement ?"
+    "enonce": "Dans ChatGPT, Claude ou Copilot, on peut créer un « GPT personnalisé », un « projet » ou un « agent » dédié à un usage précis. De quoi s'agit-il concrètement ?"
    },
    "en": {
-    "enonce": "In ChatGPT, Claude or Dust, you can create a \"custom GPT\", a \"project\" or an \"agent\" for a specific use. What is it, concretely?"
+    "enonce": "In ChatGPT, Claude or Copilot, you can create a \"custom GPT\", a \"project\" or an \"agent\" for a specific use. What is it, concretely?"
    }
   },
   {
@@ -1119,13 +1117,13 @@
     },
     {
      "id": "c",
-     "fr": "Décider d'accorder ou non une remise exceptionnelle à un client que vous suivez depuis des années.",
-     "en": "Deciding whether to grant an exceptional discount to a customer you have managed for years."
+     "fr": "Trancher l'octroi d'une dérogation exceptionnelle dans un dossier que vous suivez.",
+     "en": "Deciding whether to grant an exceptional exception in a case you handle."
     },
     {
      "id": "d",
-     "fr": "Préparer une première version de réponse à une question qu'un client vous pose fréquemment par mail.",
-     "en": "Drafting a first version of an answer to a question a customer frequently asks you by e-mail."
+     "fr": "Préparer une première version de réponse à une question qu'on vous pose fréquemment par écrit.",
+     "en": "Drafting a first version of an answer to a question people frequently ask you in writing."
     }
    ],
    "fr": {
@@ -1174,7 +1172,7 @@
    "id": "S2b",
    "bloc": 3,
    "type": "text_court",
-   "required": false,
+   "required": true,
    "fr": {
     "enonce": "En une phrase, pourquoi ce choix ?"
    },
@@ -1191,30 +1189,30 @@
    "options": [
     {
      "id": "a",
-     "fr": "« Rédige une réponse à une réclamation client pour un retard de livraison. »",
-     "en": "\"Write a reply to a customer complaint about a late delivery.\""
+     "fr": "« Rédige un message pour informer quelqu'un d'un problème. »",
+     "en": "“Write a message to inform someone about a problem.”"
     },
     {
      "id": "b",
-     "fr": "« Rédige une réponse polie et professionnelle à un client mécontent d'un retard de livraison, en t'excusant et en proposant une solution. »",
-     "en": "\"Write a polite, professional reply to a customer unhappy about a late delivery, apologising and offering a solution.\""
+     "fr": "« Rédige un message poli et professionnel pour informer un interlocuteur d'un retard, en t'excusant et en proposant une solution. »",
+     "en": "“Write a polite, professional message informing a contact of a delay, apologising and proposing a solution.”"
     },
     {
      "id": "c",
-     "fr": "« Tu es chargé de relation client dans une PME. Le client attendait sa commande le 3, livrée le 10, et menace de partir. Réponds en 10 lignes maximum, ton calme et factuel, sans jargon : reconnais le retard, explique la cause en une phrase, propose un geste commercial. Exemple du ton voulu : “Nous avons manqué notre engagement et nous le regrettons.” »",
-     "en": "\"You are a customer relations officer in an SME. The customer expected the order on the 3rd, it arrived on the 10th, and they threaten to leave. Reply in 10 lines maximum, calm and factual tone, no jargon: acknowledge the delay, explain the cause in one sentence, offer a goodwill gesture. Example of the tone I want: 'We missed our commitment and we regret it.'\""
+     "fr": "« Tu m'aides à écrire un message. Contexte : nous devions livrer le 3, ce sera le 10. Destinataire : un interlocuteur externe agacé. Objectif : annoncer le retard sans le braquer. Format : 8 lignes maximum, ton calme et factuel, sans jargon ; reconnais le retard, explique la cause en une phrase, propose une échéance ferme. »",
+     "en": "“Help me write a message. Context: we were due to deliver on the 3rd, it will be the 10th. Recipient: an annoyed external contact. Goal: announce the delay without antagonising them. Format: 8 lines max, calm and factual tone, no jargon; acknowledge the delay, explain the cause in one sentence, propose a firm new date.”"
     },
     {
      "id": "d",
-     "fr": "« Écris une réponse très complète et détaillée à un client mécontent d'un retard, en expliquant tout l'historique de la commande, nos procédures logistiques internes, toutes les raisons possibles du retard, nos engagements qualité et nos valeurs d'entreprise, puis termine par une formule de politesse chaleureuse. Sois exhaustif, précis, et n'oublie surtout rien d'important. »",
-     "en": "\"Write a very complete and detailed reply to a customer unhappy about a delay, explaining the full order history, our internal logistics procedures, all the possible reasons for the delay, our quality commitments and our company values, then reassure them about future orders and end with a warm closing. Be exhaustive, precise, and make sure you leave nothing important out.\""
+     "fr": "« Écris un message très complet et détaillé sur ce retard : reprends tout l'historique du dossier depuis le début, décris nos procédures internes étape par étape, énumère toutes les causes possibles, rappelle nos engagements qualité et nos valeurs d'entreprise, puis termine par une longue formule de politesse chaleureuse. Sois le plus exhaustif possible et surtout n'oublie aucun détail important. »",
+     "en": "« Write a very complete and detailed message about this delay: retrace the entire history of the case from the start, describe our internal procedures step by step, list every possible cause, restate our quality commitments and company values, then end with a long and warm sign-off. Be as exhaustive as possible and above all do not forget any important detail. »"
     }
    ],
    "fr": {
-    "enonce": "Vous devez répondre à un client mécontent d'un retard de livraison. Lequel de ces quatre messages envoyés à l'assistant donnera le meilleur résultat du premier coup ?"
+    "enonce": "Vous devez rédiger un message délicat pour informer un interlocuteur externe d'un problème (un retard, une erreur). Lequel de ces quatre messages envoyés à l'assistant donnera le meilleur résultat du premier coup ?"
    },
    "en": {
-    "enonce": "You need to reply to a customer unhappy about a late delivery. Which of these four messages to the assistant will give the best result first time?"
+    "enonce": "You must write a delicate message informing an external contact of a problem (a delay, a mistake). Which of these four prompts sent to the assistant will give the best result on the first try?"
    }
   },
   {
@@ -1331,30 +1329,30 @@
    "options": [
     {
      "id": "a",
-     "fr": "Vous lui faites confiance : l'assistant cite un article précis avec son numéro, il ne peut pas l'avoir inventé.",
-     "en": "You trust it: the assistant cites a specific article with its number, so it cannot have made it up."
+     "fr": "Vous appliquez directement ce qu'il indique : puisqu'il cite un emplacement précis, l'information est forcément exacte et à jour.",
+     "en": "You apply what it says directly: since it cites a precise location, the information must be accurate and up to date."
     },
     {
      "id": "b",
-     "fr": "Vous posez la même question à un second assistant et retenez la réponse si les deux donnent le même article.",
-     "en": "You ask a second assistant the same question and keep the answer if both give the same article."
+     "fr": "Vous ouvrez le document indiqué pour vérifier qu'il existe et qu'il s'agit bien de la version en vigueur.",
+     "en": "You open the document it points to, to check it exists and is the current version."
     },
     {
      "id": "c",
-     "fr": "Vous ouvrez l'article cité sur Légifrance pour vérifier qu'il existe, qu'il dit bien cela et qu'il s'applique à votre cas.",
-     "en": "You open the cited article on the official legal website to check it exists, says that, and applies to your case."
+     "fr": "Vous posez la même question à un autre assistant et vous vous y fiez si les deux réponses concordent.",
+     "en": "You ask another assistant the same question and rely on it if the two answers match."
     },
     {
      "id": "d",
-     "fr": "Vous ignorez la réponse : un assistant IA n'est pas autorisé à donner d'information juridique, seul un juriste peut le faire.",
-     "en": "You ignore the answer: an AI assistant is not allowed to give legal information, only a qualified lawyer can do that."
+     "fr": "Vous ignorez la réponse : un assistant ne peut pas retrouver de façon fiable un document interne à l'entreprise.",
+     "en": "You ignore the answer: an assistant cannot reliably retrieve an internal company document."
     }
    ],
    "fr": {
-    "enonce": "Vous demandez à l'assistant si un délai de rétractation s'applique à un contrat que vous préparez. Il répond : « Oui, 14 jours, conformément à l'article L221-18 du Code de la consommation. » Quelle est la bonne réaction ?"
+    "enonce": "Vous demandez à un assistant IA connecté aux documents de l'entreprise : « Où est la procédure à suivre pour X ? » Il répond avec assurance en citant une procédure et un emplacement précis. Que faites-vous avant de vous y fier ?"
    },
    "en": {
-    "enonce": "You ask the assistant whether a cooling-off period applies to a contract you are preparing. It answers: \"Yes, 14 days, under article L221-18 of the Consumer Code.\" What is the right reaction?"
+    "enonce": "You ask a company-connected AI assistant: “Where is the procedure for X?” It answers confidently, citing a procedure and a precise location. What do you do before relying on it?"
    }
   },
   {
@@ -1366,34 +1364,30 @@
    "options": [
     {
      "id": "a",
-     "fr": "La réponse A : elle est juste sur le chiffre légal et signale les cas où le décompte diffère.",
-     "en": "Answer A: it is right on the legal figure and flags the cases where the count differs."
+     "fr": "Vous reprenez les chiffres tels quels : le calcul sur des données est justement ce qu'une IA fait sans erreur.",
+     "en": "You take the figures as they are: computing over data is exactly what an AI does without error."
     },
     {
      "id": "b",
-     "fr": "La réponse B : plus claire et plus directe, elle va à l'essentiel sans noyer le lecteur dans les exceptions.",
-     "en": "Answer B: clearer and more direct, it gets to the point without drowning the reader in exceptions."
+     "fr": "Vous vérifiez le résultat par un recoupement simple (un total de contrôle, un tri) avant de l'utiliser.",
+     "en": "You check the result with a simple cross-check (a control total, a sort) before using it."
     },
     {
      "id": "c",
-     "fr": "La réponse B, en y ajoutant la nuance de la réponse A sur le décompte en jours ouvrés.",
-     "en": "Answer B, adding answer A's nuance about counting in business days rather than working days."
+     "fr": "Vous demandez à l'assistant s'il est sûr de son calcul et vous validez dès qu'il confirme.",
+     "en": "You ask the assistant whether it is sure of its calculation and validate as soon as it confirms."
     },
     {
      "id": "d",
-     "fr": "Aucune des deux : elles se contredisent, donc l'IA n'est pas fiable sur ce sujet et il faut demander aux RH.",
-     "en": "Neither: they contradict each other, so AI is not reliable here and you should ask HR instead."
+     "fr": "Vous renoncez à l'IA pour toute analyse de fichier : seul un tableur donne des chiffres fiables.",
+     "en": "You give up on AI for any file analysis: only a spreadsheet gives reliable figures."
     }
    ],
    "fr": {
-    "enonce": "Vous demandez à deux assistants combien de jours de congés payés un salarié à temps plein acquiert par mois en France.",
-    "contexte": "Réponse A : « Un salarié acquiert 2,5 jours ouvrables de congés payés par mois de travail effectif, soit 30 jours ouvrables par an. Selon la convention collective ou l'accord d'entreprise, le décompte peut se faire en jours ouvrés (25 par an) : vérifiez ce qui s'applique chez vous. »\n\nRéponse B : « C'est simple : 2 jours par mois, soit 24 jours par an. C'est la règle légale en France pour tous les salariés, sans exception. »",
-    "question": "Laquelle utilisez-vous ?"
+    "enonce": "Vous confiez à un assistant IA un fichier de plusieurs centaines de lignes et lui demandez un total et le point le plus élevé. Il répond en quelques secondes. Que faites-vous avant d'utiliser ce résultat dans une décision ?"
    },
    "en": {
-    "enonce": "You ask two assistants how many days of paid leave a full-time employee in France accrues per month.",
-    "contexte": "Answer A: \"An employee accrues 2.5 working days (jours ouvrables) of paid leave per month of actual work, i.e. 30 days a year. Depending on the collective agreement, the count may be in business days (25 a year): check what applies in your company.\"\n\nAnswer B: \"Simple: 2 days per month, i.e. 24 days a year. That is the legal rule in France for all employees, without exception.\"",
-    "question": "Which one do you use?"
+    "enonce": "You give an AI assistant a file of several hundred rows and ask it for a total and the highest point. It answers in seconds. What do you do before using that result in a decision?"
    }
   },
   {
@@ -1425,10 +1419,10 @@
     }
    ],
    "fr": {
-    "enonce": "Un collègue vous demande de faire passer un tableau Excel des rémunérations de l'équipe dans un assistant IA gratuit pour le mettre en forme rapidement. Que faites-vous ?"
+    "enonce": "Un collègue vous demande de faire passer dans un assistant IA gratuit un fichier contenant des données personnelles (coordonnées, éléments RH…) pour le mettre en forme rapidement. Que faites-vous ?"
    },
    "en": {
-    "enonce": "A colleague asks you to run an Excel table of the team's salaries through a free AI assistant to format it quickly. What do you do?"
+    "enonce": "A colleague asks you to run a file containing personal data (contact details, HR items…) through a free AI assistant to format it quickly. What do you do?"
    }
   },
   {
@@ -1440,8 +1434,8 @@
    "options": [
     {
      "id": "a",
-     "fr": "L'éditeur de l'assistant est responsable des erreurs éventuelles ; il faut indiquer au client que le document a été généré par IA.",
-     "en": "The assistant's provider is responsible for any errors; the customer must be told the document was AI-generated."
+     "fr": "L'éditeur de l'assistant est responsable des erreurs éventuelles ; il faut indiquer que le document a été généré par IA.",
+     "en": "The assistant's vendor is responsible for any errors; you must state that the document was AI-generated."
     },
     {
      "id": "b",
@@ -1460,10 +1454,10 @@
     }
    ],
    "fr": {
-    "enonce": "Vous envoyez à un client une note de recommandation rédigée à 90 % par un assistant IA, que vous avez relue et corrigée. Qui est responsable de son contenu, et faut-il le signaler au client ?"
+    "enonce": "Vous adressez à un interlocuteur externe un document rédigé à 90 % par un assistant IA, que vous avez relu et corrigé. Qui est responsable de son contenu, et faut-il le signaler ?"
    },
    "en": {
-    "enonce": "You send a customer a recommendation memo that was 90% written by an AI assistant and that you reviewed and corrected. Who is responsible for its content, and must you tell the customer?"
+    "enonce": "You send an external contact a document written 90% by an AI assistant, which you have reviewed and corrected. Who is responsible for its content, and should it be disclosed?"
    }
   },
   {
