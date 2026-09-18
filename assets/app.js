@@ -180,10 +180,12 @@
     if (b === 0) h += '<p class="block-intro">' + esc(CFG.nominatif ? t('intro_nominatif') : t('intro_pseudo')) + '</p>';
     h += '<div class="global-error" id="global-error" role="alert">' + esc(t('champ_requis')) + '</div>';
     var qs = questionsOfBlock(b);
+    var IDENTITY = ['prenom', 'N1', 'N2', 'equipe'];
     var n = 0;
     qs.forEach(function (q) {
-      if (!/^N/.test(q.id)) n++;
-      h += renderQuestion(q, /^N/.test(q.id) ? null : n);
+      var isIdentity = IDENTITY.indexOf(q.id) >= 0;
+      if (!isIdentity) n++;
+      h += renderQuestion(q, isIdentity ? null : n);
     });
     if (b === 5) h += '<div class="hp" aria-hidden="true"><label>Website<input type="text" id="hp-website" name="website" tabindex="-1" autocomplete="off"></label></div>';
     h += '<div class="actions">';
