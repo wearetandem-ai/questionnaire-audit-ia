@@ -154,7 +154,6 @@
   "prenom",
   "N1",
   "N2",
-  "equipe",
   "P1",
   "P2",
   "P3",
@@ -248,21 +247,6 @@
    },
    "en": {
     "enonce": "Your work e-mail address"
-   }
-  },
-  {
-   "id": "equipe",
-   "bloc": 0,
-   "type": "text_court",
-   "required": true,
-   "condition": {
-    "config": "nominatif"
-   },
-   "fr": {
-    "enonce": "Votre équipe"
-   },
-   "en": {
-    "enonce": "Your team"
    }
   },
   {
