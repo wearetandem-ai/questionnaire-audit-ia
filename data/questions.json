@@ -255,10 +255,12 @@
    "type": "text_court",
    "required": true,
    "fr": {
-    "enonce": "Dans quelle direction, quel service ou quelle équipe travaillez-vous ?"
+    "enonce": "Dans quelle direction, quel service ou quelle équipe travaillez-vous ?",
+    "aide": "Par exemple : Direction commerciale, RH, Production, Logistique, Support client…"
    },
    "en": {
-    "enonce": "Which department, team or unit do you work in?"
+    "enonce": "Which department, team or unit do you work in?",
+    "aide": "For example: Sales, HR, Production, Logistics, Customer support…"
    }
   },
   {
@@ -491,9 +493,19 @@
      "en": "Information that is already public (available on the internet)"
     },
     {
+     "id": "mails",
+     "fr": "Des e-mails internes",
+     "en": "Internal e-mails"
+    },
+    {
      "id": "interne",
-     "fr": "Des mails ou des documents internes",
-     "en": "Internal e-mails or documents"
+     "fr": "Des documents internes (comptes rendus, notes, présentations…)",
+     "en": "Internal documents (minutes, notes, presentations…)"
+    },
+    {
+     "id": "stats",
+     "fr": "Des statistiques ou indicateurs internes de l'entreprise (chiffres d'activité, KPI, tableaux de bord…)",
+     "en": "Internal company statistics or metrics (activity figures, KPIs, dashboards…)"
     },
     {
      "id": "clients",
@@ -546,6 +558,11 @@
      "id": "non_lue",
      "fr": "Oui, mais je ne l'ai pas lue",
      "en": "Yes, but I haven't read it"
+    },
+    {
+     "id": "orale",
+     "fr": "Il existe des consignes orales, mais rien d'écrit à ma connaissance",
+     "en": "There are verbal instructions, but nothing written as far as I know"
     },
     {
      "id": "non",
@@ -1101,8 +1118,8 @@
     },
     {
      "id": "c",
-     "fr": "Trancher l'octroi d'une dérogation exceptionnelle dans un dossier que vous suivez.",
-     "en": "Deciding whether to grant an exceptional exception in a case you handle."
+     "fr": "Prendre la décision finale d'accepter ou de refuser une demande exceptionnelle dans un dossier dont vous êtes responsable.",
+     "en": "Making the final decision to approve or refuse an exceptional request in a case you are responsible for."
     },
     {
      "id": "d",
